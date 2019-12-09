@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: solution
+# key: sol
+# --
+<solution>
+  <p>
+    $1
+  </p>
+</solution>
+$0

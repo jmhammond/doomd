@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: answer
+# key: ans
+# --
+<answer>
+<video youtube="$1"/>
+</answer>
+$0

@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: exercise
+# key: exe
+# --
+<exercise>
+  <statement>
+    <p>
+      $1
+    </p>
+  </statement>
+</exercise>
+$0

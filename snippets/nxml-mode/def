@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: def
+# key: def
+# uuid: definition
+# condition: t   
+# --
+<definition>
+  <statement>
+    <p>
+      $1
+    </p>
+  </statement>
+</definition>
+$0

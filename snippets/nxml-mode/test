@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: test
+# uuid: test
+# key: tes
+# condition: t
+# --
+<test>
+  $0
+</test>

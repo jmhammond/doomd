@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: example
+# key: exa
+# --
+<example>
+  <statement>
+    <p>
+    $1
+    </p>
+  </statement>
+</example>
+$0

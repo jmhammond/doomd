@@ -1,0 +1,11 @@
+# key: the
+# name: theorem
+# --
+<theorem>
+  <statement>
+    <p>
+      $1
+    </p>
+  </statement>
+</theorem>
+$0
