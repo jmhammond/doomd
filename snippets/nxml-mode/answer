@@ -3,6 +3,5 @@
 # key: ans
 # --
 <answer>
-<video youtube="$1"/>
+<video youtube="$0"/>
 </answer>
-$0

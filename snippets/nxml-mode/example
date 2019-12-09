@@ -5,8 +5,7 @@
 <example>
   <statement>
     <p>
-    $1
+    $0
     </p>
   </statement>
 </example>
-$0
