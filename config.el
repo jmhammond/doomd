@@ -4,7 +4,7 @@
 
 ;; ui
 ;;
-(setq doom-font (font-spec :family "Source Code Pro" :size 28))
+(setq doom-font (font-spec :family "Source Code Pro" :size 26))
 
 (setq doom-theme 'doom-nord)
 
@@ -16,7 +16,12 @@
 (setq +doom-dashboard-banner-file (expand-file-name "coffeesquirrel.png" doom-private-dir))
 
 ;; soft wrap everywhere
-(global-visual-line-mode 1)
+;; (note I also needed something in init.el)
+(global-visual-line-mode +1)
+;;(+global-word-wrap-mode +1)
+(setq +word-wrap-extra-indent 2)
+; this is responsible for hard wrapping.
+(remove-hook 'text-mode-hook #'auto-fill-mode)
 
 ;; nxml and smart parens
 ;; autoclose created too many > characters
@@ -49,3 +54,77 @@
            "1 sec" nil 'delete-windows-on
            (get-buffer-create buf))
           (message "No Compilation Errors!")))))
+
+;; and when losing focus, enter normal mode and go ahead and save
+(add-hook! '(doom-switch-window-hook
+             doom-switch-buffer-hook
+             focus-out-hook) ; frames
+  (evil-normal-state t)
+  (save-some-buffers t))
+
+(add-hook 'org-mode-hook #'doom-disable-line-numbers-h)
+
+;; org specific things:
+
+(after! org
+  (setq org-capture-templates '(("t" "Todo [inbox]" entry
+                               (file "~/org/inbox.org")
+                               "* TODO %i%?" :prepend t)
+                              ("l" "Todo [Linked to current line]" entry
+                               (file+headline "~/org/inbox.org" "")
+                               "* %i%? \n %a" :prepend t)
+                              ("T" "Tickler" entry
+                               (file+headline "~/org/tickler.org" "Tickler")
+                               "* %i%? \n %U" :prepend t)
+                              ("n" "Personal notes" entry
+                               (file+headline "~/org/inbox.org" "")
+                               "* %u %?\n%i\n%a" :prepend t)))
+  (setq org-todo-keywords '((sequence "TODO(t)" "WAITING(w)" "PROJECT(p)" "|" "DONE(d)" "CANCELLED(c)")))
+  (setq org-refile-targets '(("~/org/gtd.org" :maxlevel . 3)
+                           ("~/org/someday.org" :level . 1)
+                           ("~/org/tickler.org" :maxlevel . 2)))
+  (setq org-agenda-files '("~/org/inbox.org"
+                           "~/org/gtd.org"
+                           "~/org/tickler.org"))
+  (setq org-agenda-custom-commands
+      '(("o" "At the office" tags-todo "@office"
+         ((org-agenda-overriding-header "Office")))
+      ("c" "At the computer" tags-todo "@computer"
+         ((org-agenda-overriding-header "Computer")))
+      ("h" "At home" tags-todo "@home"
+         ((org-agenda-overriding-header "Home")))
+      ("e" "Errands / Buy List" tags-todo "@errands"
+         ((org-agenda-overriding-header "Errands")))
+      ("w" "Waiting For" ((todo "WAITING"))
+         ((org-agenda-overriding-header "Waiting For")))
+      ))
+
+ )
+
+
+;; here are the defaults from doom:
+;; (("t" "Personal todo" entry
+;;   (file+headline +org-capture-todo-file "Inbox")
+;;   "* [ ] %?\n%i\n%a" :prepend t)
+;;  ("n" "Personal notes" entry
+;;   (file+headline +org-capture-notes-file "Inbox")
+;;   "* %u %?\n%i\n%a" :prepend t)
+;;  ("j" "Journal" entry
+;;   (file+olp+datetree +org-capture-journal-file)
+;;   "* %U %?\n%i\n%a" :prepend t)
+;;  ("p" "Templates for projects")
+;;  ("pt" "Project-local todo" entry
+;;   (file+headline +org-capture-project-todo-file "Inbox")
+;;   "* TODO %?\n%i\n%a" :prepend t)
+;;  ("pn" "Project-local notes" entry
+;;   (file+headline +org-capture-project-notes-file "Inbox")
+;;   "* %U %?\n%i\n%a" :prepend t)
+;;  ("pc" "Project-local changelog" entry
+;;   (file+headline +org-capture-project-changelog-file "Unreleased")
+;;   "* %U %?\n%i\n%a" :prepend t)
+;;  ("o" "Centralized templates for projects")
+;;  ("ot" "Project todo" entry #'+org-capture-central-project-todo-file "* TODO %?\n %i\n %a" :heading "Tasks" :prepend nil)
+;;  ("on" "Project notes" entry #'+org-capture-central-project-notes-file "* %U %?\n %i\n %a" :heading "Notes" :prepend t)
+;;  ("oc" "Project changelog" entry #'+org-capture-central-project-changelog-file "* %U %?\n %i\n %a" :heading "Changelog" :prepend t))
+
+

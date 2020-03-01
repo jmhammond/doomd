@@ -121,7 +121,7 @@
        ;;javascript        ; all(hope(abandon(ye(who(enter(here))))))
        ;;julia             ; a better, faster MATLAB
        ;;kotlin            ; a better, slicker Java(Script)
-       ;;latex             ; writing papers in Emacs has never been so fun
+       latex             ; writing papers in Emacs has never been so fun
        ;;lean
        ;;factor
        ;;ledger            ; an accounting system in Emacs
@@ -172,6 +172,9 @@
        :config
        ;;literate
        (default +bindings +smartparens))
+; from henrik: ou have to set it in ~/.doom.d/init.el, not config.el, because the docs of evil-respect-visual-line-mode say it needs to be set before evil has loaded
+(setq evil-respect-visual-line-mode t)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
