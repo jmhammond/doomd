@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: proof
+# key: proof
+# --
+<proof>
+  <statement>
+    <p>
+      $0
+    </p>
+  </statement>
+</proof>
