@@ -62,6 +62,23 @@
   (evil-normal-state t)
   (save-some-buffers t))
 
+
+;; Zettelkasten using org-roam
+(use-package! org-roam
+  :commands (org-roam-insert org-roam-find-file org-roam)
+  :init
+  (setq org-roam-directory "~/org/zettel")
+  (map! :leader
+        :prefix "n"
+        :desc "Org-Roam-Insert" "i" #'org-roam-insert
+        :desc "Org-Roam-Find"   "/" #'org-roam-find-file
+        :desc "Org-Roam-Buffer" "r" #'org-roam)
+  (map! :map org-mode-map
+        :i  "s-;" 'org-roam-insert); cros-launcher plus semicolon
+  (map! :g  "s-/" 'org-roam-find-file)
+  :config
+  (org-roam-mode +1))
+
 (add-hook 'org-mode-hook #'doom-disable-line-numbers-h)
 
 ;; org specific things:
@@ -126,5 +143,4 @@
 ;;  ("ot" "Project todo" entry #'+org-capture-central-project-todo-file "* TODO %?\n %i\n %a" :heading "Tasks" :prepend nil)
 ;;  ("on" "Project notes" entry #'+org-capture-central-project-notes-file "* %U %?\n %i\n %a" :heading "Notes" :prepend t)
 ;;  ("oc" "Project changelog" entry #'+org-capture-central-project-changelog-file "* %U %?\n %i\n %a" :heading "Changelog" :prepend t))
-
 
