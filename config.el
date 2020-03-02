@@ -4,7 +4,7 @@
 
 ;; ui
 ;;
-(setq doom-font (font-spec :family "Source Code Pro" :size 26))
+(setq doom-font (font-spec :family "Source Code Pro" :size 28))
 
 (setq doom-theme 'doom-nord)
 
