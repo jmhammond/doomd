@@ -83,6 +83,10 @@
 
 ;; org specific things:
 
+;; this keymap is similar to the evil default "z i" for org-toggle-inline-images
+(map! :mode org-mode :n "z p" 'org-toggle-latex-fragment)
+
+
 (after! org
   (setq org-capture-templates '(("t" "Todo [inbox]" entry
                                (file "~/org/inbox.org")
