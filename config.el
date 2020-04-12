@@ -29,11 +29,15 @@
 ; this is responsible for hard wrapping.
 (remove-hook 'text-mode-hook #'auto-fill-mode)
 
-;; nxml and smart parens
+;; smartparens specific configurations
+;; TODO: basically disable all smart-parens completions
 ;; autoclose created too many > characters
 (sp-local-pair 'nxml-mode "<" ">" :post-handlers '(("[d1]" "/")))
+;; org-mode if I type *SPC, smartparens makes * |*, which is annoying
+;; I've copied the handler from smartparens' config for /SPC
+;(sp-local-pair "*" "*" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
 
-;; compile pretext documents via make
+;; compile PreText documents via make
 (defun my-make-compile ()
   (local-set-key (kbd "C-c C-c") 'recompile))
 (add-hook 'nxml-mode-hook 'my-make-compile)
@@ -42,6 +46,10 @@
 (setq undo-tree-enable-undo-in-region nil)
 
 (map! :ne "M-/" #'comment-or-uncomment-region)
+
+;; disable the company idle popup
+;; work-around for org-tables and TAB
+(setq company-idle-delay nil)
 
 ;; popups
 (set-popup-rules!
@@ -68,6 +76,8 @@
   (evil-normal-state t)
   (save-some-buffers t))
 
+;; Don't delete hidden subtrees:
+(setq org-ctrl-k-protect-subtree t)
 
 ;; Zettelkasten using org-roam
 (use-package! org-roam
@@ -80,11 +90,12 @@
         :desc "Org-Roam-Find"   "/" #'org-roam-find-file
         :desc "Org-Roam-Buffer" "r" #'org-roam)
   (map! :map org-mode-map
-        :i  "s-;" 'org-roam-insert); cros-launcher plus semicolon
+        :iv  "s-;" 'org-roam-insert); cros-launcher plus semicolon
   (map! :g  "s-/" 'org-roam-find-file)
   :config
   (org-roam-mode +1))
 
+;; In case you forget, me, line-numbers are terrible for org files and emacs performance
 (add-hook 'org-mode-hook #'doom-disable-line-numbers-h)
 
 ;; org specific things:
@@ -119,37 +130,40 @@
   ;; on message://aoeu link, this will call handler with //aoeu
   (org-link-set-parameters "message" :follow #'org-message-thunderlink-open)
 
-  (setq org-capture-templates '(("t" "Todo [inbox]" entry
-                               (file "~/org/inbox.org")
-                               "* TODO %i%?" :prepend t)
-                              ("l" "Todo [Linked to current line]" entry
-                               (file+headline "~/org/inbox.org" "")
-                               "* %i%? \n %a" :prepend t)
-                              ("T" "Tickler" entry
-                               (file+headline "~/org/tickler.org" "Tickler")
-                               "* %i%? \n %U" :prepend t)
-                              ("n" "Personal notes" entry
-                               (file+headline "~/org/inbox.org" "")
-                               "* %u %?\n%i\n%a" :prepend t)))
-  (setq org-todo-keywords '((sequence "TODO(t)" "WAITING(w)" "PROJECT(p)" "|" "DONE(d)" "CANCELLED(c)")))
-  (setq org-refile-targets '(("~/org/gtd.org" :maxlevel . 3)
-                           ("~/org/someday.org" :level . 1)
-                           ("~/org/tickler.org" :maxlevel . 2)))
-  (setq org-agenda-files '("~/org/inbox.org"
-                           "~/org/gtd.org"
-                           "~/org/tickler.org"))
-  (setq org-agenda-custom-commands
-      '(("o" "At the office" tags-todo "@office"
-         ((org-agenda-overriding-header "Office")))
-      ("c" "At the computer" tags-todo "@computer"
-         ((org-agenda-overriding-header "Computer")))
-      ("h" "At home" tags-todo "@home"
-         ((org-agenda-overriding-header "Home")))
-      ("e" "Errands / Buy List" tags-todo "@errands"
-         ((org-agenda-overriding-header "Errands")))
-      ("w" "Waiting For" ((todo "WAITING"))
-         ((org-agenda-overriding-header "Waiting For")))
-      ))
+  ;; here's the deal: I don't use org-agenda
+  ;; ... I don't have capture templates that I want to use yet
+  ;; ... let's dump all the copy-paste-from-the-internet
+  ;; (setq org-capture-templates '(("t" "Todo [inbox]" entry
+  ;;                              (file "~/org/inbox.org")
+  ;;                              "* TODO %i%?" :prepend t)
+  ;;                             ("l" "Todo [Linked to current line]" entry
+  ;;                              (file+headline "~/org/inbox.org" "")
+  ;;                              "* %i%? \n %a" :prepend t)
+  ;;                             ("T" "Tickler" entry
+  ;;                              (file+headline "~/org/tickler.org" "Tickler")
+  ;;                              "* %i%? \n %U" :prepend t)
+  ;;                             ("n" "Personal notes" entry
+  ;;                              (file+headline "~/org/inbox.org" "")
+  ;;                              "* %u %?\n%i\n%a" :prepend t)))
+  ;; (setq org-todo-keywords '((sequence "TODO(t)" "WAITING(w)" "PROJECT(p)" "|" "DONE(d)" "CANCELLED(c)")))
+  ;; (setq org-refile-targets '(("~/org/gtd.org" :maxlevel . 3)
+  ;;                          ("~/org/someday.org" :level . 1)
+  ;;                          ("~/org/tickler.org" :maxlevel . 2)))
+  ;; (setq org-agenda-files '("~/org/inbox.org"
+  ;;                          "~/org/gtd.org"
+  ;;                          "~/org/tickler.org"))
+  ;; (setq org-agenda-custom-commands
+  ;;     '(("o" "At the office" tags-todo "@office"
+  ;;        ((org-agenda-overriding-header "Office")))
+  ;;     ("c" "At the computer" tags-todo "@computer"
+  ;;        ((org-agenda-overriding-header "Computer")))
+  ;;     ("h" "At home" tags-todo "@home"
+  ;;        ((org-agenda-overriding-header "Home")))
+  ;;     ("e" "Errands / Buy List" tags-todo "@errands"
+  ;;        ((org-agenda-overriding-header "Errands")))
+  ;;     ("w" "Waiting For" ((todo "WAITING"))
+  ;;        ((org-agenda-overriding-header "Waiting For")))
+  ;;     ))
 
  )
 

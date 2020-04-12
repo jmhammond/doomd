@@ -13,6 +13,14 @@
 ;;
 (package! ox-twbs)
 
-;; Setup this package.
 (package! org-roam
-  :recipe (:host github :repo "jethrokuan/org-roam" :branch "develop"))
+  :recipe (:host github :repo "jethrokuan/org-roam"))
+
+(package! org-rifle
+  :recipe (:host github :repo "alphapapa/org-rifle"))
+
+(package! org-web-tools
+  :recipe (:host github :repo "alphapapa/org-web-tools"))
+
+;; (package! alpha-org ;; /u/alphapapa's super org starter kit
+;;   :recipe (:host github :repo "alphapapa/alpha-org"))
