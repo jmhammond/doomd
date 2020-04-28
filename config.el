@@ -9,7 +9,7 @@
       doom-scratch-buffer-major-mode 'org-mode
 
       ;; ui
-      doom-font (font-spec :family "Source Code Pro" :size 28)
+      doom-font (font-spec :family "Source Code Pro" :size 14)
       doom-theme 'doom-nord-light
       +doom-dashboard-banner-file (expand-file-name "coffeesquirrel.png" doom-private-dir)
 
@@ -20,6 +20,10 @@
       display-line-numbers-type nil
 )
 
+
+;; In crouton, I want to use the croutonurlhandler
+(setq browse-url-browser-function 'browse-url-generic
+     browse-url-generic-program "croutonurlhandler")
 
 ;; soft wrap everywhere
 ;; (note I also needed something in init.el)
@@ -50,6 +54,10 @@
 ;; disable the company idle popup
 ;; work-around for org-tables and TAB
 (setq company-idle-delay nil)
+
+;; unmap tab from company and yas-snippets in insert mode:
+(map! :map company-keymap "TAB" nil)
+(map! :map yas-keymap "TAB" nil)
 
 ;; popups
 (set-popup-rules!
