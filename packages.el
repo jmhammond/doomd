@@ -13,8 +13,8 @@
 ;;
 (package! ox-twbs)
 
-(package! org-roam
-  :recipe (:host github :repo "jethrokuan/org-roam"))
+;(package! org-roam
+;  :recipe (:host github :repo "jethrokuan/org-roam"))
 
 (package! org-rifle
   :recipe (:host github :repo "alphapapa/org-rifle"))
