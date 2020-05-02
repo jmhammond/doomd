@@ -9,8 +9,12 @@
       doom-scratch-buffer-major-mode 'org-mode
 
       ;; ui
+      ;; (cond
+      ;;  ((string-equal system-name "penguin"))) ;;
+        ;; if running in crouton/sommelier:
       doom-font (font-spec :family "Source Code Pro" :size 28)
       doom-theme 'doom-nord-light
+      ;;doom-theme 'doom-one-light
       +doom-dashboard-banner-file (expand-file-name "coffeesquirrel.png" doom-private-dir)
 
       ;; crostini doesn't let us do top/left, but the width/height works
@@ -20,6 +24,10 @@
       display-line-numbers-type nil
 )
 
+
+;; In crouton, I want to use the croutonurlhandler
+(setq browse-url-browser-function 'browse-url-generic
+     browse-url-generic-program "croutonurlhandler")
 
 ;; soft wrap everywhere
 ;; (note I also needed something in init.el)
@@ -50,9 +58,8 @@
 (setq company-idle-delay nil)
 
 ;; unmap tab from company and yas-snippets in insert mode:
-;; (map! :map company-keymap "TAB" nil)
-;; (map! :map yas-keymap "TAB" nil)
-(map! :i [tab] nil)
+(map! :map company-keymap "TAB" nil)
+(map! :map yas-keymap "TAB" nil)
 
 ;; popups
 (set-popup-rules!
@@ -82,21 +89,21 @@
 ;; Don't delete hidden subtrees:
 (setq org-ctrl-k-protect-subtree t)
 
-;; Zettelkasten using org-roam
-(use-package! org-roam
-  :commands (org-roam-insert org-roam-find-file org-roam)
-  :init
-  (setq org-roam-directory "~/org/zettel")
-  (map! :leader
-        :prefix "n"
-        :desc "Org-Roam-Insert" "i" #'org-roam-insert
-        :desc "Org-Roam-Find"   "/" #'org-roam-find-file
-        :desc "Org-Roam-Buffer" "r" #'org-roam)
-  (map! :map org-mode-map
-        :iv  "s-;" 'org-roam-insert); cros-launcher plus semicolon
-  (map! :g  "s-/" 'org-roam-find-file)
-  :config
-  (org-roam-mode +1))
+;; ;; Zettelkasten using org-roam
+;; (use-package! org-roam
+;;   :commands (org-roam-insert org-roam-find-file org-roam)
+;;   :init
+;;   (setq org-roam-directory "~/org/zettel")
+;;   (map! :leader
+;;         :prefix "n"
+;;         :desc "Org-Roam-Insert" "i" #'org-roam-insert
+;;         :desc "Org-Roam-Find"   "/" #'org-roam-find-file
+;;         :desc "Org-Roam-Buffer" "r" #'org-roam)
+;;   (map! :map org-mode-map
+;;         :iv  "s-;" 'org-roam-insert); cros-launcher plus semicolon
+;;   (map! :g  "s-/" 'org-roam-find-file)
+;;   :config
+;;   (org-roam-mode +1))
 
 ;; In case you forget, me, line-numbers are terrible for org files and emacs performance
 (add-hook 'org-mode-hook #'doom-disable-line-numbers-h)
