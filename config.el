@@ -30,12 +30,10 @@
 (remove-hook 'text-mode-hook #'auto-fill-mode)
 
 ;; smartparens specific configurations
-;; TODO: basically disable all smart-parens completions
+;; disable all smart-parens completions; I kind of hate it.
+(after! smartparens (smartparens-global-mode -1))
 ;; autoclose created too many > characters
-(sp-local-pair 'nxml-mode "<" ">" :post-handlers '(("[d1]" "/")))
-;; org-mode if I type *SPC, smartparens makes * |*, which is annoying
-;; I've copied the handler from smartparens' config for /SPC
-;(sp-local-pair "*" "*" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
+;; (sp-local-pair 'nxml-mode "<" ">" :post-handlers '(("[d1]" "/")))
 
 ;; compile PreText documents via make
 (defun my-make-compile ()
@@ -50,6 +48,11 @@
 ;; disable the company idle popup
 ;; work-around for org-tables and TAB
 (setq company-idle-delay nil)
+
+;; unmap tab from company and yas-snippets in insert mode:
+;; (map! :map company-keymap "TAB" nil)
+;; (map! :map yas-keymap "TAB" nil)
+(map! :i [tab] nil)
 
 ;; popups
 (set-popup-rules!

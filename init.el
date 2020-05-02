@@ -21,7 +21,7 @@
         +fuzzy)
 
        :ui
-       deft              ; notational velocity for Emacs
+       ;;deft              ; notational velocity for Emacs
        doom              ; what makes DOOM look the way it does
        doom-dashboard    ; a nifty splash screen for Emacs
        doom-quit         ; DOOM quit-message prompts when you quit Emacs
@@ -141,6 +141,7 @@
         +pandoc          ; export-with-pandoc support
         ;;+pomodoro        ; be fruitful with the tomato technique
         +present        ; using org-mode for presentations
+        +roam ; thanks jethro
         )
         ;+roam)        ; using org-mode for presentations
        ;;perl              ; write code no one else can comprehend
@@ -176,7 +177,8 @@
 
        :config
        ;;literate
-       (default +bindings +smartparens))
+       ;; (default +bindings +smartparens))
+       (default +bindings ))
 ; from henrik: ou have to set it in ~/.doom.d/init.el, not config.el, because the docs of evil-respect-visual-line-mode say it needs to be set before evil has loaded
 (setq evil-respect-visual-line-mode t)
 
