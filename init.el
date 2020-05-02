@@ -142,13 +142,7 @@
         +pandoc          ; export-with-pandoc support
         ;;+pomodoro        ; be fruitful with the tomato technique
         +present        ; using org-mode for presentations
-<<<<<<< HEAD
-        +roam ; thanks jethro
-        )
-        ;+roam)        ; using org-mode for presentations
-=======
-        +roam)        ; using org-mode for presentations
->>>>>>> ed8fd29a099eb3a448b3b25eb0225fbbc3ade11f
+        +roam)   
        ;;perl              ; write code no one else can comprehend
        ;;php               ; perl's insecure younger brother
        ;;plantuml          ; diagrams for confusing people more
