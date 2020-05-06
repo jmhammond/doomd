@@ -93,7 +93,7 @@
 
 
 (map! :leader
-      :desc "Org-roam capture to today"           "d"    #'org-roam-dailies-capture-today
+;;      :desc "Org-roam capture to today"           "d"    #'org-roam-dailies-capture-today
       ;; prefer the unshifted semicolon for Ex commands
       ";" 'execute-extended-command
       ":" 'eval-expression)
@@ -106,32 +106,32 @@
   ;; Don't delete hidden subtrees:
   (setq org-ctrl-k-protect-subtree t)
 
-  (defun org-roam-dailies-capture-today ()
-    "Capture a note into the daily note for today."
-    (interactive)
-    (let ((org-roam-capture-templates org-roam-dailies-capture-templates)
-          (org-roam-capture--info (list (cons 'time (current-time))))
-          (org-roam-capture--context 'dailies))
-      (org-roam--capture)))
+  ;; (defun org-roam-dailies-capture-today ()
+  ;;   "Capture a note into the daily note for today."
+  ;;   (interactive)
+  ;;   (let ((org-roam-capture-templates org-roam-dailies-capture-templates)
+  ;;         (org-roam-capture--info (list (cons 'time (current-time))))
+  ;;         (org-roam-capture--context 'dailies))
+  ;;     (org-roam--capture)))
 
-  (setq org-roam-dailies-capture-templates
-        '(("d" "daily" plain (function org-roam-capture--get-point)
-           "* %?"
-           :file-name "%<%Y-%m-%d>"
-           :head "#+TITLE: %<%Y-%m-%d>")))
+  ;; (setq org-roam-dailies-capture-templates
+  ;;       '(("d" "daily" plain (function org-roam-capture--get-point)
+  ;;          "* %?"
+  ;;          :file-name "%<%Y-%m-%d>"
+  ;;          :head "#+TITLE: %<%Y-%m-%d>")))
 
   ;; My attempt at capturing to the daily note
-  ;; (defun visit-the-daily-note()
-  ;;   "Visit a new file named by the current timestamp"
-  ;;   (interactive)
-  ;;   (let* (
-  ;;          (curr-date-stamp (format-time-string "%Y-%m-%d.org"))
-  ;;          (file-name (expand-file-name curr-date-stamp "~/org/roam/")))
-  ;;     (set-buffer (org-capture-target-buffer file-name))
-  ;;     (goto-char (point-max))))
+  (defun visit-the-daily-note()
+    "Visit a new file named by the current timestamp"
+    (interactive)
+    (let* (
+           (curr-date-stamp (format-time-string "%Y-%m-%d.org"))
+           (file-name (expand-file-name curr-date-stamp "~/org/roam/")))
+      (set-buffer (org-capture-target-buffer file-name))
+      (goto-char (point-max))))
 
-  ;; (setq org-capture-templates '(("n" "Note" entry (function visit-the-daily-note)
-  ;;                                "* %?\n")))
+  (setq org-capture-templates '(("n" "Note" entry (function visit-the-daily-note)
+                                 "* %?\n")))
 
 
 
