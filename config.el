@@ -38,12 +38,14 @@
 (remove-hook 'text-mode-hook #'auto-fill-mode)
 
 ;; smartparens specific configurations
-;; TODO: basically disable all smart-parens completions
 ;; autoclose created too many > characters
 (sp-local-pair 'nxml-mode "<" ">" :post-handlers '(("[d1]" "/")))
 ;; org-mode if I type *SPC, smartparens makes * |*, which is annoying
 ;; I've copied the handler from smartparens' config for /SPC
 ;(sp-local-pair "*" "*" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
+;; TODO: basically disable all smart-parens completions
+(smartparens-global-mode -1)
+
 
 ;; compile PreText documents via make
 (defun my-make-compile ()
@@ -70,6 +72,7 @@
   `(("^\\*compilation" :size=0.2 :ttl 0))) ;; doesn't kill *compilation*
 
 ;; .. but this does; the 'compilation-finish-function runs after 'compile
+
 ;; https://emacs.stackexchange.com/questions/62/hide-compilation-window
 ;; (setq compilation-finish-function
 ;; ;; (add-hook! 'compilation-finish-functions  <-- don't know why doom-emacs doesn't like this
@@ -82,46 +85,72 @@
 ;;            (get-buffer-create buf))
 ;;           (message "No Compilation Errors!")))))
 
-;; and when losing focus, enter normal mode and go ahead and save
+;; TODO change this back.
+;; and when losing focus, enter normal mode go ahead and save
 (add-hook! '(doom-switch-window-hook
              doom-switch-buffer-hook
              focus-out-hook) ; frames
-  (evil-normal-state t)
+  ;; (evil-normal-state t) ;; this breaks company's popup window, so disable
   (save-some-buffers t))
-
-;; Don't delete hidden subtrees:
-(setq org-ctrl-k-protect-subtree t)
-
-;; ;; Zettelkasten using org-roam
-;; (use-package! org-roam
-;;   :commands (org-roam-insert org-roam-find-file org-roam)
-;;   :init
-;;   (setq org-roam-directory "~/org/zettel")
-;;   (map! :leader
-;;         :prefix "n"
-;;         :desc "Org-Roam-Insert" "i" #'org-roam-insert
-;;         :desc "Org-Roam-Find"   "/" #'org-roam-find-file
-;;         :desc "Org-Roam-Buffer" "r" #'org-roam)
-;;   (map! :map org-mode-map
-;;         :iv  "s-;" 'org-roam-insert); cros-launcher plus semicolon
-;;   (map! :g  "s-/" 'org-roam-find-file)
-;;   :config
-;;   (org-roam-mode +1))
 
 ;; In case you forget, me, line-numbers are terrible for org files and emacs performance
 (add-hook 'org-mode-hook #'doom-disable-line-numbers-h)
 
-;; org specific things:
 
+(map! :leader
+      :desc "Org-roam capture to today"           "d"    #'org-roam-dailies-capture-today
+      ;; prefer the unshifted semicolon for Ex commands
+      ";" 'execute-extended-command
+      ":" 'eval-expression)
+
+(defun org-to-clipboard ()
+  "Convert the contents of the current buffer or region from Org
+mode to HTML.  Store the result in the clipboard."
+  (interactive)
+  (if (use-region-p)
+      (shell-command-on-region (region-beginning)
+                               (region-end)
+                               "~/apps/org2clip")
+      (shell-command-on-region (point-min)
+                               (point-max)
+                               "~/apps/org2clip")))
 
 ;; this keymap is similar to the evil default "z i" for org-toggle-inline-images
 (map! :mode org-mode :n "z p" 'org-toggle-latex-fragment)
 
-;; prefer the unshifted semicolon for Ex commands
-(map! :leader ";" 'execute-extended-command)
-(map! :leader ":" 'eval-expression)
-
 (after! org
+
+  ;; Don't delete hidden subtrees:
+  (setq org-ctrl-k-protect-subtree t)
+
+  (defun org-roam-dailies-capture-today ()
+    "Capture a note into the daily note for today."
+    (interactive)
+    (let ((org-roam-capture-templates org-roam-dailies-capture-templates)
+          (org-roam-capture--info (list (cons 'time (current-time))))
+          (org-roam-capture--context 'dailies))
+      (org-roam--capture)))
+
+  (setq org-roam-dailies-capture-templates
+        '(("d" "daily" plain (function org-roam-capture--get-point)
+           "* %?"
+           :file-name "%<%Y-%m-%d>"
+           :head "#+TITLE: %<%Y-%m-%d>")))
+
+  ;; My attempt at capturing to the daily note
+  ;; (defun visit-the-daily-note()
+  ;;   "Visit a new file named by the current timestamp"
+  ;;   (interactive)
+  ;;   (let* (
+  ;;          (curr-date-stamp (format-time-string "%Y-%m-%d.org"))
+  ;;          (file-name (expand-file-name curr-date-stamp "~/org/roam/")))
+  ;;     (set-buffer (org-capture-target-buffer file-name))
+  ;;     (goto-char (point-max))))
+
+  ;; (setq org-capture-templates '(("n" "Note" entry (function visit-the-daily-note)
+  ;;                                "* %?\n")))
+
+
 
   ;; Email link handlink for message:// links
   (setq thunderbird-program "/usr/bin/thunderbird")
