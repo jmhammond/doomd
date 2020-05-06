@@ -98,18 +98,6 @@
       ";" 'execute-extended-command
       ":" 'eval-expression)
 
-(defun org-to-clipboard ()
-  "Convert the contents of the current buffer or region from Org
-mode to HTML.  Store the result in the clipboard."
-  (interactive)
-  (if (use-region-p)
-      (shell-command-on-region (region-beginning)
-                               (region-end)
-                               "~/apps/org2clip")
-      (shell-command-on-region (point-min)
-                               (point-max)
-                               "~/apps/org2clip")))
-
 ;; this keymap is similar to the evil default "z i" for org-toggle-inline-images
 (map! :mode org-mode :n "z p" 'org-toggle-latex-fragment)
 
