@@ -13,7 +13,8 @@
       ;;  ((string-equal system-name "penguin"))) ;;
         ;; if running in crouton/sommelier:
       doom-font (font-spec :family "Source Code Pro" :size 28)
-      doom-theme 'doom-nord-light
+      ;doom-theme 'doom-nord-light
+      doom-theme 'doom-dark+
       ;;doom-theme 'doom-one-light
       +doom-dashboard-banner-file (expand-file-name "coffeesquirrel.png" doom-private-dir)
 
@@ -22,12 +23,27 @@
 
       ;; remove line numbers to speed up emacs
       display-line-numbers-type nil
-)
+      )
 
+;; (after! evil-surround
+;;   (defmacro define-and-bind-text-object (key start-regex end-regex)
+;;     (let ((inner-name (make-symbol "inner-name"))
+;;           (outer-name (make-symbol "outer-name")))
+;;       `(progn
+;;          (evil-define-text-object ,inner-name (count &optional beg end type)
+;;            (evil-select-paren ,start-regex ,end-regex beg end type count nil))
+;;          (evil-define-text-object ,outer-name (count &optional beg end type)
+;;            (evil-select-paren ,start-regex ,end-regex beg end type count t))
+;;          (define-key evil-inner-text-objects-map ,key (quote ,inner-name))
+;;          (define-key evil-outer-text-objects-map ,key (quote ,outer-name)))))
+;;                                         ; between dollar signs:
+;;   (define-and-bind-text-object "$" "\\$" "\\$")
+;;                                         ; between pipe characters:
+;;   (define-and-bind-text-object "|" "|" "|"))
 
 ;; In crouton, I want to use the croutonurlhandler
-(setq browse-url-browser-function 'browse-url-generic
-     browse-url-generic-program "croutonurlhandler")
+;(setq browse-url-browser-function 'browse-url-generic
+;     browse-url-generic-program "croutonurlhandler")
 
 ;; soft wrap everywhere
 ;; (note I also needed something in init.el)
@@ -39,9 +55,8 @@
 
 ;; smartparens specific configurations
 ;; disable all smart-parens completions; I kind of hate it.
-(after! smartparens (smartparens-global-mode -1))
 ;; autoclose created too many > characters
-;; (sp-local-pair 'nxml-mode "<" ">" :post-handlers '(("[d1]" "/")))
+(sp-local-pair 'nxml-mode "<" ">" :post-handlers '(("[d1]" "/")))
 
 ;; compile PreText documents via make
 (defun my-make-compile ()
@@ -52,6 +67,23 @@
 (setq undo-tree-enable-undo-in-region nil)
 
 (map! :ne "M-/" #'comment-or-uncomment-region)
+
+
+(defun +evil-embrace-dollars-h ()
+  (embrace-add-pair ?$ "$" "$"))
+(add-hook 'org-mode-hook #'+evil-embrace-dollars-h)
+(add-hook 'nxml-mode-hook #'+evil-embrace-dollars-h)
+
+;; First, dump smartparens in AucTex, then use Auctex's own electric bracket and math closures
+;(add-hook 'LaTeX-mode-hook #'turn-off-smartparens-mode)
+(setq TeX-electric-sub-and-superscript nil)
+;; (setq LaTeX-electric-left-right-brace 't)
+;; (setq TeX-electric-math (cons "$" "$"))
+
+(global-evil-motion-trainer-mode 1)
+(setq evil-motion-trainer-threshold 4)
+; (setq evil-motion-trainer-super-annoying-mode t)
+
 
 ;; disable the company idle popup
 ;; work-around for org-tables and TAB
@@ -65,7 +97,6 @@
 (set-popup-rules!
   '(("^\\*Warnings" :size 0.2 :ttl 2))
   `(("^\\*compilation" :size=0.2 :ttl 0))) ;; doesn't kill *compilation*
-
 ;; .. but this does; the 'compilation-finish-function runs after 'compile
 
 ;; https://emacs.stackexchange.com/questions/62/hide-compilation-window

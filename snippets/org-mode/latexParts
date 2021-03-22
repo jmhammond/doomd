@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: latexParts
+# uuid:
+# key: par
+# condition: t
+# --
+\begin{parts}
+    $1
+\end{parts}

@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: introduction
+# uuid:
+# key: intro
+# condition: t
+# --
+<introduction>
+  <statement>
+    <p>
+      $0
+    </p>
+  </statement>
+</introduction>

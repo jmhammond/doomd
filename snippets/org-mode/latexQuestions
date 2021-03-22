@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: latexQuestions
+# uuid:
+# key: que
+# condition: t
+# --
+\begin{questions}
+    $1
+\end{questions}

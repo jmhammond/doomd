@@ -24,3 +24,6 @@
 
 ;; (package! alpha-org ;; /u/alphapapa's super org starter kit
 ;;   :recipe (:host github :repo "alphapapa/alpha-org"))
+(package! org-ref :recipe (:host github :repo "fuxialexander/org-ref" :files ("*")))
+
+(package! evil-motion-trainer :recipe (:host github :repo "martinbaillie/evil-motion-trainer"))

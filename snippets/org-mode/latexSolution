@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: latex solution
+# uuid:
+# key: sol
+# condition: t
+# --
+\begin{solution}
+    $1
+\end{solution}
