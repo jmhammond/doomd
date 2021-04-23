@@ -8,22 +8,27 @@
       ;; make *Scratch* act like org-mode
       doom-scratch-buffer-major-mode 'org-mode
 
-      ;; ui
-      ;; (cond
-      ;;  ((string-equal system-name "penguin"))) ;;
-        ;; if running in crouton/sommelier:
-      doom-font (font-spec :family "Source Code Pro" :size 28)
+      doom-font (font-spec :family "Source Code Pro" :size 16)
       ;doom-theme 'doom-nord-light
-      doom-theme 'doom-dark+
+      ;doom-theme 'doom-dark+
+      doom-theme 'doom-zenburn
       ;;doom-theme 'doom-one-light
       +doom-dashboard-banner-file (expand-file-name "coffeesquirrel.png" doom-private-dir)
 
-      ;; crostini doesn't let us do top/left, but the width/height works
       initial-frame-alist '((top . 1) (left . 1) (width . 100) (height . 40))
 
       ;; remove line numbers to speed up emacs
-      display-line-numbers-type nil
+      display-line-numbers-type 'relative
+
       )
+
+(when (equal system-type 'darwin)
+  (setq insert-directory-program "/opt/homebrew/bin/gls")
+
+  ;; I want scrollbars on macos
+  (setq scroll-bar-mode 'right)
+  (scroll-bar-mode)
+  )
 
 ;; (after! evil-surround
 ;;   (defmacro define-and-bind-text-object (key start-regex end-regex)
@@ -45,6 +50,7 @@
 ;(setq browse-url-browser-function 'browse-url-generic
 ;     browse-url-generic-program "croutonurlhandler")
 
+
 ;; soft wrap everywhere
 ;; (note I also needed something in init.el)
 (global-visual-line-mode +1)
@@ -57,6 +63,14 @@
 ;; disable all smart-parens completions; I kind of hate it.
 ;; autoclose created too many > characters
 (sp-local-pair 'nxml-mode "<" ">" :post-handlers '(("[d1]" "/")))
+
+(setq nxml-slash-auto-complete-flag t)
+
+
+;; For macos auctex building
+(setenv "PATH" (concat (getenv "PATH") ":/Library/TeX/texbin/"))
+(setq exec-path (append exec-path '("/Library/TeX/texbin/")))
+
 
 ;; compile PreText documents via make
 (defun my-make-compile ()
@@ -80,8 +94,8 @@
 ;; (setq LaTeX-electric-left-right-brace 't)
 ;; (setq TeX-electric-math (cons "$" "$"))
 
-(global-evil-motion-trainer-mode 1)
-(setq evil-motion-trainer-threshold 4)
+;; (global-evil-motion-trainer-mode 1)
+;; (setq evil-motion-trainer-threshold 4)
 ; (setq evil-motion-trainer-super-annoying-mode t)
 
 
@@ -95,11 +109,22 @@
 
 ;; popups
 (set-popup-rules!
-  '(("^\\*Warnings" :size 0.2 :ttl 2))
-  `(("^\\*compilation" :size=0.2 :ttl 0))) ;; doesn't kill *compilation*
+ '(("^ \\*" :slot -1) ; fallback rule for special buffers
+   ("^\\*" :select t)
+   ("^\\*Warnings" :select t)
+   ("^\\*compilation" :select t)
+   ("^\\*Completions" :slot -1 :ttl 0)
+   ("^\\*\\(?:scratch\\|Messages\\)" :ttl t)
+   ("^\\*Help" :slot -1 :size 0.2 :select t)
+   ("^\\*doom:"
+    :size 0.35 :select t :modeline t :quit t :ttl t)))
+
+;; (set-popup-rules!
+;;   '(("^\\*Warnings" :size 0.2 :ttl 2))
+;;   `(("^\\*compilation" :size=0.2 :ttl 0))) ;; doesn't kill *compilation*
 ;; .. but this does; the 'compilation-finish-function runs after 'compile
 
-;; https://emacs.stackexchange.com/questions/62/hide-compilation-window
+;; ;; https://emacs.stackexchange.com/questions/62/hide-compilation-window
 ;; (setq compilation-finish-function
 ;; ;; (add-hook! 'compilation-finish-functions  <-- don't know why doom-emacs doesn't like this
 ;;   (lambda (buf str)
@@ -111,17 +136,16 @@
 ;;            (get-buffer-create buf))
 ;;           (message "No Compilation Errors!")))))
 
-;; TODO change this back.
+;; ;;
+
 ;; and when losing focus, enter normal mode go ahead and save
 (add-hook! '(doom-switch-window-hook
-             doom-switch-buffer-hook
-             focus-out-hook) ; frames
+             doom-switch-buffer-hook)
   ;; (evil-normal-state t) ;; this breaks company's popup window, so disable
   (save-some-buffers t))
 
 ;; In case you forget, me, line-numbers are terrible for org files and emacs performance
 (add-hook 'org-mode-hook #'doom-disable-line-numbers-h)
-
 
 (map! :leader
 ;;      :desc "Org-roam capture to today"           "d"    #'org-roam-dailies-capture-today
@@ -157,7 +181,7 @@
     (interactive)
     (let* (
            (curr-date-stamp (format-time-string "%Y-%m-%d.org"))
-           (file-name (expand-file-name curr-date-stamp "~/org/roam/")))
+           (file-name (expand-file-name curr-date-stamp "~/Documents/org/roam/")))
       (set-buffer (org-capture-target-buffer file-name))
       (goto-char (point-max))))
 
@@ -165,26 +189,27 @@
                                  "* %?\n")))
 
 
+  ;; do something different with message:// links so they open in apple mail
 
   ;; Email link handlink for message:// links
-  (setq thunderbird-program "/usr/bin/thunderbird")
-  (defun org-message-thunderlink-open (slash-message-id)
-    "Handler for org-link-set-parameters that converts a standard message:// link into
-   a thunderlink and then invokes thunderbird."
-    ;; remove any / at the start of slash-message-id to create real message-id
-    (let ((message-id
-           (replace-regexp-in-string (rx bos (* "/"))
-                                     ""
-                                     slash-message-id)))
-      (start-process
-       (concat "thunderlink: " message-id)
-       nil
-       thunderbird-program
-       "-thunderlink"
-       (concat "thunderlink://messageid=" message-id)
-       )))
-  ;; on message://aoeu link, this will call handler with //aoeu
-  (org-link-set-parameters "message" :follow #'org-message-thunderlink-open)
+  ;; ;; (setq thunderbird-program "/usr/bin/thunderbird")
+  ;; (defun org-message-thunderlink-open (slash-message-id)
+  ;;   "Handler for org-link-set-parameters that converts a standard message:// link into
+  ;;  a thunderlink and then invokes thunderbird."
+  ;;   ;; remove any / at the start of slash-message-id to create real message-id
+  ;;   (let ((message-id
+  ;;          (replace-regexp-in-string (rx bos (* "/"))
+  ;;                                    ""
+  ;;                                    slash-message-id)))
+  ;;     (start-process
+  ;;      (concat "thunderlink: " message-id)
+  ;;      nil
+  ;;      thunderbird-program
+  ;;      "-thunderlink"
+  ;;      (concat "thunderlink://messageid=" message-id)
+  ;;      )))
+  ;; ;; on message://aoeu link, this will call handler with //aoeu
+  ;; (org-link-set-parameters "message" :follow #'org-message-thunderlink-open)
 
   ;; here's the deal: I don't use org-agenda
   ;; ... I don't have capture templates that I want to use yet
