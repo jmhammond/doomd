@@ -151,8 +151,8 @@
        ;;ocaml             ; an objective camel
        (org               ; organize your plain life in plain text
         +babel
-        +present
-        +roam)
+        +present)
+        ;+roam)
        ;;php               ; perl's insecure younger brother
        ;;plantuml          ; diagrams for confusing people more
        ;;purescript        ; javascript, but functional
