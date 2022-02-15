@@ -1,7 +1,5 @@
 ;;; .doom.d/config.el -*- lexical-binding: t; -*-
 
-;; Place your private configuration here
-
 (setq user-full-name "John Hammond"
       user-mail-address "jmhammond@gmail.com"
 
@@ -11,13 +9,17 @@
       doom-font (font-spec :family "Source Code Pro" :size 16)
       ;doom-theme 'doom-nord-light
       ;doom-theme 'doom-dark+
-      doom-theme 'doom-zenburn
+      ;doom-theme 'doom-zenburn
+      ;doom-theme 'doom-one
+      doom-theme 'doom-dracula
       ;;doom-theme 'doom-one-light
       +doom-dashboard-banner-file (expand-file-name "coffeesquirrel.png" doom-private-dir)
 
       initial-frame-alist '((top . 1) (left . 1) (width . 100) (height . 40))
 
-      display-line-numbers-type 'relative
+      display-line-numbers-type 'visual
+      ; let f, s, etc, find on visual lines
+      evil-cross-lines t
 
       evil-snipe-scope 'buffer
 
@@ -29,28 +31,33 @@
   ;; I want scrollbars on macos
   (setq scroll-bar-mode 'right)
   (scroll-bar-mode)
+
+
+  (setq mac-command-modifier      'super
+        ns-command-modifier       'super
+        mac-option-modifier       'meta
+        ns-option-modifier        'meta
+        ; it is a bug in emacs that external keyboards plugged in treat ALL modifier keys has right-modifiers... so make right modifer option to meta to get the standard alt behavior! https://github.com/hlissner/doom-emacs/issues/4178
+        mac-right-option-modifier 'meta
+        ns-right-option-modifier  'meta)
+)
+;
+; The following makes emacs follow (correctly!) the links setup in Obsidian
+(setq markdown-enable-wiki-links t
+      markdown-wiki-link-search-type '(parent-directories sub-directories)
+      markdown-enable-math t
+      markdown-wiki-link-fontify-missing t
+      )
+
+;; deft
+(after! 'deft
+  (setq deft-extensions '("txt" "md" "org"))
+  (setq deft-recursive t)
+  (add-to-list deft-recursive-ignore-dir-regexp
+               "papers") ; ignore the papers subdirectory created by Zotero > mdnotes
+  (define-key deft-mode-map (kbd "C-p") 'widget-backward)
+  (define-key deft-mode-map (kbd "C-n") 'widget-forward)
   )
-
-;; (after! evil-surround
-;;   (defmacro define-and-bind-text-object (key start-regex end-regex)
-;;     (let ((inner-name (make-symbol "inner-name"))
-;;           (outer-name (make-symbol "outer-name")))
-;;       `(progn
-;;          (evil-define-text-object ,inner-name (count &optional beg end type)
-;;            (evil-select-paren ,start-regex ,end-regex beg end type count nil))
-;;          (evil-define-text-object ,outer-name (count &optional beg end type)
-;;            (evil-select-paren ,start-regex ,end-regex beg end type count t))
-;;          (define-key evil-inner-text-objects-map ,key (quote ,inner-name))
-;;          (define-key evil-outer-text-objects-map ,key (quote ,outer-name)))))
-;;                                         ; between dollar signs:
-;;   (define-and-bind-text-object "$" "\\$" "\\$")
-;;                                         ; between pipe characters:
-;;   (define-and-bind-text-object "|" "|" "|"))
-
-;; In crouton, I want to use the croutonurlhandler
-;(setq browse-url-browser-function 'browse-url-generic
-;     browse-url-generic-program "croutonurlhandler")
-
 
 ;; soft wrap everywhere
 ;; (note I also needed something in init.el)
@@ -59,6 +66,7 @@
 (setq +word-wrap-extra-indent 2)
 ; this is responsible for hard wrapping.
 (remove-hook 'text-mode-hook #'auto-fill-mode)
+
 
 ;; smartparens specific configurations
 ;; disable all smart-parens completions; I kind of hate it.
@@ -73,8 +81,9 @@
 (setq exec-path (append exec-path '("/Library/TeX/texbin/")))
 
 
-;; compile PreText documents via make
+;; compile PreText documents via `pretext build'
 (defun my-make-compile ()
+  (setq compile-command "pretext build html")
   (local-set-key (kbd "C-c C-c") 'recompile))
 (add-hook 'nxml-mode-hook 'my-make-compile)
 
@@ -145,11 +154,13 @@
   ;; (evil-normal-state t) ;; this breaks company's popup window, so disable
   (save-some-buffers t))
 
+(add-to-list 'auto-mode-alist '("~/TheArchive/.*\\.md\\'" . org-mode))
+
+
 ;; In case you forget, me, line-numbers are terrible for org files and emacs performance
 (add-hook 'org-mode-hook #'doom-disable-line-numbers-h)
 
 (map! :leader
-;;      :desc "Org-roam capture to today"           "d"    #'org-roam-dailies-capture-today
       ;; prefer the unshifted semicolon for Ex commands
       ";" 'execute-extended-command
       ":" 'eval-expression)
@@ -161,6 +172,22 @@
 
   ;; Don't delete hidden subtrees:
   (setq org-ctrl-k-protect-subtree t)
+
+  (require 'org-ref)
+  (require 'org-re-reveal-ref)
+
+
+;;;  ; this super doesn't work. :-(
+  (setq org-capture-templates
+       '(("w"
+         "Default template"
+         entry
+         (file+headline "~/org/capture.org" "Notes")
+         "* %^{Title}\n\n  Source: %u, %c\n\n  %i"
+         :empty-lines 1)
+        ("l" "A link, for reading later." entry (file+headline "~/org/inbox.org" "Reading List") "* %:description\n%u\n\n%c\n\n%i" :empty-lines 1)
+        ))
+
 
   ;; (defun org-roam-dailies-capture-today ()
   ;;   "Capture a note into the daily note for today."
@@ -176,18 +203,53 @@
   ;;          :file-name "%<%Y-%m-%d>"
   ;;          :head "#+TITLE: %<%Y-%m-%d>")))
 
-  ;; My attempt at capturing to the daily note
-  (defun visit-the-daily-note()
-    "Visit a new file named by the current timestamp"
-    (interactive)
-    (let* (
-           (curr-date-stamp (format-time-string "%Y-%m-%d.org"))
-           (file-name (expand-file-name curr-date-stamp "~/Documents/org/roam/")))
-      (set-buffer (org-capture-target-buffer file-name))
-      (goto-char (point-max))))
 
-  (setq org-capture-templates '(("n" "Note" entry (function visit-the-daily-note)
-                                 "* %?\n")))
+  ;; (use-package! org-roam
+  ;;   :after org
+  ;;   :demand t
+  ;;   :commands
+  ;;   (org-roam-buffer
+  ;;    org-roam-setup
+  ;;    org-roam-capture
+  ;;    org-roam-node-find)
+  ;;   :config
+  ;;   ;;(setq org-roam-mode-sections
+  ;;   ;;      (list #'org-roam-backlinks-insert-section
+  ;;   ;;            #'org-roam-reflinks-insert-section
+  ;;   ;;            #'org-roam-unlinked-references-insert-section))
+  ;;   (org-roam-setup))
+
+  ;;
+  ;;
+  ;; My attempt at capturing to the daily note
+  ;; (defun visit-the-daily-note()
+  ;;   "Visit a new file named by the current timestamp"
+  ;;   (interactive)
+  ;;   (let* (
+  ;;          (curr-date-stamp (format-time-string "%Y-%m-%d.org"))
+  ;;          (file-name (expand-file-name curr-date-stamp "~/Documents/org/roam/")))
+  ;;     (set-buffer (org-capture-target-buffer file-name))
+  ;;     (goto-char (point-max))))
+
+  ;; (setq org-capture-templates '(("n" "Note" entry (function visit-the-daily-note)
+  ;;                                "* %?\n")))
+  ;;
+
+
+  ;; obsidan link handling for obsidian:// links
+  (defun org-obidian-link-open (slash-message-id)
+    "Handler for org-link-set-parameters that opens a obsidian:// link in obsidian"
+    ;; remove any / at the start of slash-message-id to create real note-id
+    (let ((message-id
+           (replace-regexp-in-string (rx bos (* "/"))
+                                     ""
+                                     slash-message-id)))
+      (do-applescript
+       (concat "tell application \"Obsidian\" to open location \"obsidian://"
+               message-id
+               "\" activate"))))
+  ;; on obsdian://aoeu link, this will call handler with //aoeu
+  (org-link-set-parameters "obsidian" :follow #'org-obidian-link-open)
 
   ;; Email link handlink for message:// links
   (defun org-message-mail-open (slash-message-id)
@@ -204,66 +266,4 @@
   ;; on message://aoeu link, this will call handler with //aoeu
   (org-link-set-parameters "message" :follow #'org-message-mail-open)
 
-  ;; here's the deal: I don't use org-agenda
-  ;; ... I don't have capture templates that I want to use yet
-  ;; ... let's dump all the copy-paste-from-the-internet
-  ;; (setq org-capture-templates '(("t" "Todo [inbox]" entry
-  ;;                              (file "~/org/inbox.org")
-  ;;                              "* TODO %i%?" :prepend t)
-  ;;                             ("l" "Todo [Linked to current line]" entry
-  ;;                              (file+headline "~/org/inbox.org" "")
-  ;;                              "* %i%? \n %a" :prepend t)
-  ;;                             ("T" "Tickler" entry
-  ;;                              (file+headline "~/org/tickler.org" "Tickler")
-  ;;                              "* %i%? \n %U" :prepend t)
-  ;;                             ("n" "Personal notes" entry
-  ;;                              (file+headline "~/org/inbox.org" "")
-  ;;                              "* %u %?\n%i\n%a" :prepend t)))
-  ;; (setq org-todo-keywords '((sequence "TODO(t)" "WAITING(w)" "PROJECT(p)" "|" "DONE(d)" "CANCELLED(c)")))
-  ;; (setq org-refile-targets '(("~/org/gtd.org" :maxlevel . 3)
-  ;;                          ("~/org/someday.org" :level . 1)
-  ;;                          ("~/org/tickler.org" :maxlevel . 2)))
-  ;; (setq org-agenda-files '("~/org/inbox.org"
-  ;;                          "~/org/gtd.org"
-  ;;                          "~/org/tickler.org"))
-  ;; (setq org-agenda-custom-commands
-  ;;     '(("o" "At the office" tags-todo "@office"
-  ;;        ((org-agenda-overriding-header "Office")))
-  ;;     ("c" "At the computer" tags-todo "@computer"
-  ;;        ((org-agenda-overriding-header "Computer")))
-  ;;     ("h" "At home" tags-todo "@home"
-  ;;        ((org-agenda-overriding-header "Home")))
-  ;;     ("e" "Errands / Buy List" tags-todo "@errands"
-  ;;        ((org-agenda-overriding-header "Errands")))
-  ;;     ("w" "Waiting For" ((todo "WAITING"))
-  ;;        ((org-agenda-overriding-header "Waiting For")))
-  ;;     ))
-
- )
-
-
-;; here are the defaults from doom:
-;; (("t" "Personal todo" entry
-;;   (file+headline +org-capture-todo-file "Inbox")
-;;   "* [ ] %?\n%i\n%a" :prepend t)
-;;  ("n" "Personal notes" entry
-;;   (file+headline +org-capture-notes-file "Inbox")
-;;   "* %u %?\n%i\n%a" :prepend t)
-;;  ("j" "Journal" entry
-;;   (file+olp+datetree +org-capture-journal-file)
-;;   "* %U %?\n%i\n%a" :prepend t)
-;;  ("p" "Templates for projects")
-;;  ("pt" "Project-local todo" entry
-;;   (file+headline +org-capture-project-todo-file "Inbox")
-;;   "* TODO %?\n%i\n%a" :prepend t)
-;;  ("pn" "Project-local notes" entry
-;;   (file+headline +org-capture-project-notes-file "Inbox")
-;;   "* %U %?\n%i\n%a" :prepend t)
-;;  ("pc" "Project-local changelog" entry
-;;   (file+headline +org-capture-project-changelog-file "Unreleased")
-;;   "* %U %?\n%i\n%a" :prepend t)
-;;  ("o" "Centralized templates for projects")
-;;  ("ot" "Project todo" entry #'+org-capture-central-project-todo-file "* TODO %?\n %i\n %a" :heading "Tasks" :prepend nil)
-;;  ("on" "Project notes" entry #'+org-capture-central-project-notes-file "* %U %?\n %i\n %a" :heading "Notes" :prepend t)
-;;  ("oc" "Project changelog" entry #'+org-capture-central-project-changelog-file "* %U %?\n %i\n %a" :heading "Changelog" :prepend t))
-
+  )
