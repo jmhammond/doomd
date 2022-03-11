@@ -3,27 +3,39 @@
 (setq user-full-name "John Hammond"
       user-mail-address "jmhammond@gmail.com"
 
-      ;; make *Scratch* act like org-mode
-      doom-scratch-buffer-major-mode 'org-mode
-
       doom-font (font-spec :family "Source Code Pro" :size 16)
+      doom-variable-pitch-font (font-spec :family "Source Serif 4" )
+      doom-serif-font (font-spec :family "Source Serif 4" )
+      ;; doom-font (font-spec :family "Fira Code" :size 16)
+      ;; doom-variable-pitch-font (font-spec :family "Baskerville" :size 19)
+      ;; doom-serif-font (font-spec :family "Baskerville" :height 45)
+      ;; doom-font (font-spec :family "Input Mono" :size 14)
+      ;; doom-variable-pitch-font (font-spec :family "Source Code Variable" :size 14)
       ;doom-theme 'doom-nord-light
       ;doom-theme 'doom-dark+
       ;doom-theme 'doom-zenburn
-      ;doom-theme 'doom-one
-      doom-theme 'doom-dracula
+      doom-theme 'doom-vibrant
+      ;doom-theme 'doom-dracula
+      ;doom-theme 'doom-material
       ;;doom-theme 'doom-one-light
+;      doom-theme 'doom-vibrant
       +doom-dashboard-banner-file (expand-file-name "coffeesquirrel.png" doom-private-dir)
 
       initial-frame-alist '((top . 1) (left . 1) (width . 100) (height . 40))
 
-      display-line-numbers-type 'visual
+;      display-line-numbers-type 'visual
       ; let f, s, etc, find on visual lines
       evil-cross-lines t
 
       evil-snipe-scope 'buffer
 
+      ;; make *Scratch* act like org-mode
+      doom-scratch-buffer-major-mode 'org-mode
+
       )
+
+
+
 
 (when (equal system-type 'darwin)
   (setq insert-directory-program "/opt/homebrew/bin/gls")
@@ -49,15 +61,80 @@
       markdown-wiki-link-fontify-missing t
       )
 
-;; deft
-(after! 'deft
-  (setq deft-extensions '("txt" "md" "org"))
-  (setq deft-recursive t)
-  (add-to-list deft-recursive-ignore-dir-regexp
-               "papers") ; ignore the papers subdirectory created by Zotero > mdnotes
-  (define-key deft-mode-map (kbd "C-p") 'widget-backward)
-  (define-key deft-mode-map (kbd "C-n") 'widget-forward)
-  )
+; mixed pitch fonts; proportional AND fixed in the same buffer
+; from https://github.com/tecosaur/emacs-config/blob/master/config.org
+(defvar mixed-pitch-modes '(org-mode LaTeX-mode markdown-mode gfm-mode Info-mode)
+  "Modes that `mixed-pitch-mode' should be enabled in, but only after UI initialisation.")
+(defun init-mixed-pitch-h ()
+  "Hook `mixed-pitch-mode' into each mode in `mixed-pitch-modes'.
+Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
+  (when (memq major-mode mixed-pitch-modes)
+    (mixed-pitch-mode 1))
+  (dolist (hook mixed-pitch-modes)
+    (add-hook (intern (concat (symbol-name hook) "-hook")) #'mixed-pitch-mode)))
+(add-hook 'doom-init-ui-hook #'init-mixed-pitch-h)
+;;
+;; (autoload #'mixed-pitch-serif-mode "mixed-pitch"
+;;   "Change the default face of the current buffer to a serifed variable pitch, while keeping some faces fixed pitch." t)
+
+(after! mixed-pitch
+  (defface variable-pitch-serif
+    '((t (:family "serif")))
+    "A variable-pitch face with serifs."
+    :group 'basic-faces)
+  ;(setq mixed-pitch-set-height t)
+  (setq variable-pitch-serif-font doom-variable-pitch-font)
+  (set-face-attribute 'variable-pitch-serif nil :font variable-pitch-serif-font)
+  (defun mixed-pitch-serif-mode (&optional arg)
+    "Change the default face of the current buffer to a serifed variable pitch, while keeping some faces fixed pitch."
+    (interactive)
+    (let ((mixed-pitch-face 'variable-pitch-serif))
+      (mixed-pitch-mode (or arg 'toggle)))))
+
+;;;;;; copied from tecosaur
+; calculator! I need to actually use it sometimes...
+(setq calc-angle-mode 'rad  ; radians are rad
+      calc-symbolic-mode t)
+
+
+; split windows, be asked what to load:
+(setq evil-vsplit-window-right t
+      evil-split-window-below t)
+(defadvice! prompt-for-buffer (&rest _)
+  :after '(evil-window-split evil-window-vsplit)
+  (consult-buffer))
+
+(after! evil
+  (setq evil-ex-substitute-global t
+        evil-move-cursor-back nil       ; Don't move the block cursor when toggling insert mode; this is truly game changing!
+        evil-kill-on-visual-paste nil)) ; Don't put overwritten text in the kill ring
+
+(after! centaur-tabs
+  (centaur-tabs-mode -1)
+  (setq centaur-tabs-height 32
+        centaur-tabs-set-icons t
+        ;centaur-tabs-modified-marker "o"
+        centaur-tabs-close-button "×"
+        centaur-tabs-set-bar 'under
+        centaur-tabs-plain-icons nil
+        centaur-tabs-style "rounded"
+        centaur-tabs-gray-out-icons 'buffer)
+  (centaur-tabs-change-fonts "Baskerville" 180))
+;; (setq x-underline-at-descent-line t)
+
+;; which-key popups are good.
+(setq which-key-idle-delay 0.5)
+(setq which-key-allow-multiple-replacements t)
+(after! which-key
+  (pushnew!
+   which-key-replacement-alist
+   '(("" . "\\`+?evil[-:]?\\(?:a-\\)?\\(.*\\)") . (nil . "◂\\1"))
+   '(("\\`g s" . "\\`evilem--?motion-\\(.*\\)") . (nil . "◃\\1"))
+   ))
+
+;; ignore unneccessary tex files and such in find-file
+(after! counsel
+  (setq counsel-find-file-ignore-regexp "\\(?:^#\\)\\|\\(?:[#~]$\\)\\|\\(?:^Icon?\\)\\|\\(aux\\)\\|\\(fdb_latexmk\\)\\|\\(fls\\)\\|\\(out\\)\\|\\(synctex\\)\\|\\(pdf\\)\\|\\(log\\)"))
 
 ;; soft wrap everywhere
 ;; (note I also needed something in init.el)
@@ -72,9 +149,15 @@
 ;; disable all smart-parens completions; I kind of hate it.
 ;; autoclose created too many > characters
 (sp-local-pair 'nxml-mode "<" ">" :post-handlers '(("[d1]" "/")))
-
 (setq nxml-slash-auto-complete-flag t)
 
+;; spell checking
+;; (setf (alist-get 'nxml-mode +spell-excluded-faces-alist)
+;;       '(nxml-namespace-attribute-xmlns
+;;         nxml-attribute-value
+;;         nxml-element-local-name)
+;; )
+;;
 
 ;; For macos auctex building
 (setenv "PATH" (concat (getenv "PATH") ":/Library/TeX/texbin/"))
@@ -96,7 +179,7 @@
 (defun +evil-embrace-dollars-h ()
   (embrace-add-pair ?$ "$" "$"))
 (add-hook 'org-mode-hook #'+evil-embrace-dollars-h)
-(add-hook 'nxml-mode-hook #'+evil-embrace-dollars-h)
+(add-hook 'nxml-mode-hook #'+evil-embrace-dollars-h) ; <-- why in xml mode? there it's <m>...
 
 ;; First, dump smartparens in AucTex, then use Auctex's own electric bracket and math closures
 ;(add-hook 'LaTeX-mode-hook #'turn-off-smartparens-mode)
@@ -119,40 +202,31 @@
 
 ;; popups
 (set-popup-rules!
- '(("^ \\*" :slot -1) ; fallback rule for special buffers
-   ("^\\*" :select t)
+ '(
    ("^\\*Warnings" :select t)
    ("^\\*compilation" :select t)
    ("^\\*Completions" :slot -1 :ttl 0)
    ("^\\*\\(?:scratch\\|Messages\\)" :ttl t)
-   ("^\\*Help" :slot -1 :size 0.2 :select t)
+   ("^\\*Help" :slot -1 :size 0.4 :select t)
    ("^\\*doom:"
     :size 0.35 :select t :modeline t :quit t :ttl t)))
 
-;; (set-popup-rules!
-;;   '(("^\\*Warnings" :size 0.2 :ttl 2))
-;;   `(("^\\*compilation" :size=0.2 :ttl 0))) ;; doesn't kill *compilation*
-;; .. but this does; the 'compilation-finish-function runs after 'compile
+; With no error, get rid of the compile window
+(add-hook 'compilation-finish-functions
+  (lambda (buf str)
+    (if (null (string-match ".*exited abnormally.*" str))
+        (progn
+          (run-at-time
+           "0.3 sec" nil 'delete-windows-on buf)
+          (message "No Compilation Errors.")))))
 
-;; ;; https://emacs.stackexchange.com/questions/62/hide-compilation-window
-;; (setq compilation-finish-function
-;; ;; (add-hook! 'compilation-finish-functions  <-- don't know why doom-emacs doesn't like this
-;;   (lambda (buf str)
-;;     (if (null (string-match ".*exited abnormally.*" str))
-;;         ;;no errors, make the compilation window go away in a few seconds
-;;         (progn
-;;           (run-at-time
-;;            "1 sec" nil 'delete-windows-on
-;;            (get-buffer-create buf))
-;;           (message "No Compilation Errors!")))))
 
-;; ;;
-
+;; 3-10-22: Note: this was back in ChromeOS crouton days. I think I'm okay to leave a window unsaved when jumping.
 ;; and when losing focus, enter normal mode go ahead and save
-(add-hook! '(doom-switch-window-hook
-             doom-switch-buffer-hook)
-  ;; (evil-normal-state t) ;; this breaks company's popup window, so disable
-  (save-some-buffers t))
+;; (add-hook! '(doom-switch-window-hook
+;;              doom-switch-buffer-hook)
+;;   ;; (evil-normal-state t) ;; this breaks company's popup window, so disable
+;;   (save-some-buffers t))
 
 (add-to-list 'auto-mode-alist '("~/TheArchive/.*\\.md\\'" . org-mode))
 
