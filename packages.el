@@ -24,6 +24,9 @@
 
 ;; (package! power-mode
 ;;   :recipe (:host github :repo "elizagamedev/power-mode.el"))
+;;
+;; (package! j-emacs-everywhere
+;;   :recipe (:host github :repo "jmhammond/emacs-everywhere"))
 
 (package! org-ref)
 (package! org-re-reveal-ref)

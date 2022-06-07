@@ -6,6 +6,7 @@
       doom-font (font-spec :family "Source Code Pro" :size 16)
       doom-variable-pitch-font (font-spec :family "Source Serif 4" )
       doom-serif-font (font-spec :family "Source Serif 4" )
+      doom-theme 'modus-vivendi
       ;; doom-font (font-spec :family "Fira Code" :size 16)
       ;; doom-variable-pitch-font (font-spec :family "Baskerville" :size 19)
       ;; doom-serif-font (font-spec :family "Baskerville" :height 45)
@@ -14,11 +15,11 @@
       ;doom-theme 'doom-nord-light
       ;doom-theme 'doom-dark+
       ;doom-theme 'doom-zenburn
-      doom-theme 'doom-vibrant
+      ;doom-theme 'doom-vibrant
       ;doom-theme 'doom-dracula
       ;doom-theme 'doom-material
       ;;doom-theme 'doom-one-light
-;      doom-theme 'doom-vibrant
+;     ; doom-theme 'doom-vibrant
       +doom-dashboard-banner-file (expand-file-name "coffeesquirrel.png" doom-private-dir)
 
       initial-frame-alist '((top . 1) (left . 1) (width . 100) (height . 40))
@@ -34,6 +35,9 @@
 
       )
 
+(setq emacs-everywhere-major-mode-function #'org-mode
+      emacs-everywhere-paste-p nil
+      )
 
 
 
@@ -104,23 +108,112 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
   :after '(evil-window-split evil-window-vsplit)
   (consult-buffer))
 
+;; treemacs
+;;
+(with-eval-after-load 'treemacs
+  (define-key treemacs-mode-map [mouse-1] #'treemacs-single-click-expand-action))
+(after! treemacs
+  (defvar treemacs-file-ignore-extensions '()
+    "File extension which `treemacs-ignore-filter' will ensure are ignored")
+  (defvar treemacs-file-ignore-globs '()
+    "Globs which will are transformed to `treemacs-file-ignore-regexps' which `treemacs-ignore-filter' will ensure are ignored")
+  (defvar treemacs-file-ignore-regexps '()
+    "RegExps to be tested to ignore files, generated from `treeemacs-file-ignore-globs'")
+  (defun treemacs-file-ignore-generate-regexps ()
+    "Generate `treemacs-file-ignore-regexps' from `treemacs-file-ignore-globs'"
+    (setq treemacs-file-ignore-regexps (mapcar 'dired-glob-regexp treemacs-file-ignore-globs)))
+  (if (equal treemacs-file-ignore-globs '()) nil (treemacs-file-ignore-generate-regexps))
+  (defun treemacs-ignore-filter (file full-path)
+    "Ignore files specified by `treemacs-file-ignore-extensions', and `treemacs-file-ignore-regexps'"
+    (or (member (file-name-extension file) treemacs-file-ignore-extensions)
+        (let ((ignore-file nil))
+          (dolist (regexp treemacs-file-ignore-regexps ignore-file)
+            (setq ignore-file (or ignore-file (if (string-match-p regexp full-path) t nil)))))))
+  (add-to-list 'treemacs-ignored-file-predicates #'treemacs-ignore-filter))
+
+;; from https://tecosaur.github.io/emacs-config/config.html
+(setq treemacs-file-ignore-extensions
+      '(;; LaTeX
+        "aux"
+        "ptc"
+        "fdb_latexmk"
+        "fls"
+        "synctex.gz"
+        "toc"
+        ;; LaTeX - glossary
+        "glg"
+        "glo"
+        "gls"
+        "glsdefs"
+        "ist"
+        "acn"
+        "acr"
+        "alg"
+        ;; LaTeX - pgfplots
+        "mw"
+        ;; LaTeX - pdfx
+        "pdfa.xmpi"
+        ))
+(setq treemacs-file-ignore-globs
+      '(;; LaTeX
+        "*/_minted-*"
+        ;; AucTeX
+        "*/.auctex-auto"
+        "*/_region_.log"
+        "*/_region_.tex"))
+
 (after! evil
   (setq evil-ex-substitute-global t
         evil-move-cursor-back nil       ; Don't move the block cursor when toggling insert mode; this is truly game changing!
         evil-kill-on-visual-paste nil)) ; Don't put overwritten text in the kill ring
 
-(after! centaur-tabs
-  (centaur-tabs-mode -1)
-  (setq centaur-tabs-height 32
-        centaur-tabs-set-icons t
-        ;centaur-tabs-modified-marker "o"
-        centaur-tabs-close-button "×"
-        centaur-tabs-set-bar 'under
-        centaur-tabs-plain-icons nil
-        centaur-tabs-style "rounded"
-        centaur-tabs-gray-out-icons 'buffer)
-  (centaur-tabs-change-fonts "Baskerville" 180))
+;; (after! centaur-tabs
+;;   (centaur-tabs-mode -1)
+;;   (setq centaur-tabs-height 24
+;;         centaur-tabs-set-icons t
+;;         ;centaur-tabs-modified-marker "o"
+;;         centaur-tabs-close-button "×"
+;;         centaur-tabs-set-bar 'under
+;;         centaur-tabs-plain-icons t
+;;         centaur-tabs-style "rounded"
+;;         centaur-tabs-gray-out-icons 'buffer)
+;;   (centaur-tabs-change-fonts "Baskerville" 180))
 ;; (setq x-underline-at-descent-line t)
+;;
+
+;(after! all-the-icons
+;  (setcdr (assoc "ptx" all-the-icons-extension-icon-alist)
+;          (cdr (assoc "xml" all-the-icons-extension-icon-alist))))
+;(after! all-the-icons
+;  (all-the-icons-wicon   "ptx"))
+;(insert (all-the-icons-icon-for-file "foo.js"))
+    ;; Inserts a javascript icon
+    ;; #("js-icon" 0 1 (display (raise -0.24) face (:family "alltheicon" :height 1.08 :foreground "#FFD446")))
+    ;;
+    ;;
+;;
+;; hopefully don't let doom upgrade compile natively every package
+(setq native-comp-deferred-compilation t)
+
+(setq
+ doom-modeline-icon (display-graphic-p)
+ doom-modeline-major-mode-icon t
+ doom-modeline-major-mode-color-icon t
+ ;doom-vibrant-brighter-modeline t
+ doom-modeline-height 1
+ doom-modeline-buffer-state-icon t)
+(setq all-the-icons-scale-factor 1.0)
+(custom-set-faces!
+  '(mode-line :family "Fira Code" :height 1.0)
+  '(mode-line-inactive :family "Fira Code" :height 1.0))
+
+(defun doom-modeline-conditional-buffer-encoding ()
+  "We expect the encoding to be LF UTF-8, so only show the modeline when this is not the case"
+  (setq-local doom-modeline-buffer-encoding
+              (unless (or (eq buffer-file-coding-system 'utf-8-unix)
+                          (eq buffer-file-coding-system 'utf-8)))))
+(add-hook! 'after-change-major-mode-hook #'doom-modeline-conditional-buffer-encoding)
+
 
 ;; which-key popups are good.
 (setq which-key-idle-delay 0.5)
