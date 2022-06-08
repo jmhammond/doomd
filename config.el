@@ -131,36 +131,44 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
             (setq ignore-file (or ignore-file (if (string-match-p regexp full-path) t nil)))))))
   (add-to-list 'treemacs-ignored-file-predicates #'treemacs-ignore-filter))
 
-;; from https://tecosaur.github.io/emacs-config/config.html
-(setq treemacs-file-ignore-extensions
-      '(;; LaTeX
-        "aux"
-        "ptc"
-        "fdb_latexmk"
-        "fls"
-        "synctex.gz"
-        "toc"
-        ;; LaTeX - glossary
-        "glg"
-        "glo"
-        "gls"
-        "glsdefs"
-        "ist"
-        "acn"
-        "acr"
-        "alg"
-        ;; LaTeX - pgfplots
-        "mw"
-        ;; LaTeX - pdfx
-        "pdfa.xmpi"
-        ))
-(setq treemacs-file-ignore-globs
-      '(;; LaTeX
-        "*/_minted-*"
-        ;; AucTeX
-        "*/.auctex-auto"
-        "*/_region_.log"
-        "*/_region_.tex"))
+(map! :g "M-0" #'treemacs-select-window)
+(map! :g "M-o" #'treemacs-select-window)
+(after! treemacs
+  (treemacs-follow-mode t)
+  (treemacs-indent-guide-mode t)
+  (setq treemacs-resize-icons 44
+        treemacs-width 35
+        treemacs-width-is-initially-locked nil
+        treemacs-indent-guide-style 'line
+        treemacs-file-ignore-extensions
+        '(;; LaTeX
+          "aux"
+          "ptc"
+          "fdb_latexmk"
+          "fls"
+          "synctex.gz"
+          "toc"
+          ;; LaTeX - glossary
+          "glg"
+          "glo"
+          "gls"
+          "glsdefs"
+          "ist"
+          "acn"
+          "acr"
+          "alg"
+          ;; LaTeX - pgfplots
+          "mw"
+          ;; LaTeX - pdfx
+          "pdfa.xmpi"
+          )
+        treemacs-file-ignore-globs
+        '(;; LaTeX
+          "*/_minted-*"
+          ;; AucTeX
+          "*/.auctex-auto"
+          "*/_region_.log"
+          "*/_region_.tex")))
 
 (after! evil
   (setq evil-ex-substitute-global t
@@ -181,16 +189,16 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
 ;; (setq x-underline-at-descent-line t)
 ;;
 
-;(after! all-the-icons
-;  (setcdr (assoc "ptx" all-the-icons-extension-icon-alist)
-;          (cdr (assoc "xml" all-the-icons-extension-icon-alist))))
-;(after! all-the-icons
-;  (all-the-icons-wicon   "ptx"))
-;(insert (all-the-icons-icon-for-file "foo.js"))
-    ;; Inserts a javascript icon
-    ;; #("js-icon" 0 1 (display (raise -0.24) face (:family "alltheicon" :height 1.08 :foreground "#FFD446")))
-    ;;
-    ;;
+                                        ;(after! all-the-icons
+                                        ;  (setcdr (assoc "ptx" all-the-icons-extension-icon-alist)
+                                        ;          (cdr (assoc "xml" all-the-icons-extension-icon-alist))))
+                                        ;(after! all-the-icons
+                                        ;  (all-the-icons-wicon   "ptx"))
+                                        ;(insert (all-the-icons-icon-for-file "foo.js"))
+;; Inserts a javascript icon
+;; #("js-icon" 0 1 (display (raise -0.24) face (:family "alltheicon" :height 1.08 :foreground "#FFD446")))
+;;
+;;
 ;;
 ;; hopefully don't let doom upgrade compile natively every package
 (setq native-comp-deferred-compilation t)
@@ -199,7 +207,7 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
  doom-modeline-icon (display-graphic-p)
  doom-modeline-major-mode-icon t
  doom-modeline-major-mode-color-icon t
- ;doom-vibrant-brighter-modeline t
+                                        ;doom-vibrant-brighter-modeline t
  doom-modeline-height 1
  doom-modeline-buffer-state-icon t)
 (setq all-the-icons-scale-factor 1.0)
@@ -234,7 +242,7 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
 (global-visual-line-mode +1)
 ;;(+global-word-wrap-mode +1)
 (setq +word-wrap-extra-indent 2)
-; this is responsible for hard wrapping.
+                                        ; this is responsible for hard wrapping.
 (remove-hook 'text-mode-hook #'auto-fill-mode)
 
 
@@ -275,14 +283,14 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
 (add-hook 'nxml-mode-hook #'+evil-embrace-dollars-h) ; <-- why in xml mode? there it's <m>...
 
 ;; First, dump smartparens in AucTex, then use Auctex's own electric bracket and math closures
-;(add-hook 'LaTeX-mode-hook #'turn-off-smartparens-mode)
+                                        ;(add-hook 'LaTeX-mode-hook #'turn-off-smartparens-mode)
 (setq TeX-electric-sub-and-superscript nil)
 ;; (setq LaTeX-electric-left-right-brace 't)
 ;; (setq TeX-electric-math (cons "$" "$"))
 
 ;; (global-evil-motion-trainer-mode 1)
 ;; (setq evil-motion-trainer-threshold 4)
-; (setq evil-motion-trainer-super-annoying-mode t)
+                                        ; (setq evil-motion-trainer-super-annoying-mode t)
 
 
 ;; disable the company idle popup
@@ -295,23 +303,23 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
 
 ;; popups
 (set-popup-rules!
- '(
-   ("^\\*Warnings" :select t)
-   ("^\\*compilation" :select t)
-   ("^\\*Completions" :slot -1 :ttl 0)
-   ("^\\*\\(?:scratch\\|Messages\\)" :ttl t)
-   ("^\\*Help" :slot -1 :size 0.4 :select t)
-   ("^\\*doom:"
-    :size 0.35 :select t :modeline t :quit t :ttl t)))
+  '(
+    ("^\\*Warnings" :select t)
+    ("^\\*compilation" :select t)
+    ("^\\*Completions" :slot -1 :ttl 0)
+    ("^\\*\\(?:scratch\\|Messages\\)" :ttl t)
+    ("^\\*Help" :slot -1 :size 0.4 :select t)
+    ("^\\*doom:"
+     :size 0.35 :select t :modeline t :quit t :ttl t)))
 
-; With no error, get rid of the compile window
+                                        ; With no error, get rid of the compile window
 (add-hook 'compilation-finish-functions
-  (lambda (buf str)
-    (if (null (string-match ".*exited abnormally.*" str))
-        (progn
-          (run-at-time
-           "0.3 sec" nil 'delete-windows-on buf)
-          (message "No Compilation Errors.")))))
+          (lambda (buf str)
+            (if (null (string-match ".*exited abnormally.*" str))
+                (progn
+                  (run-at-time
+                   "0.3 sec" nil 'delete-windows-on buf)
+                  (message "No Compilation Errors.")))))
 
 
 ;; 3-10-22: Note: this was back in ChromeOS crouton days. I think I'm okay to leave a window unsaved when jumping.
@@ -346,14 +354,14 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
 
 ;;;  ; this super doesn't work. :-(
   (setq org-capture-templates
-       '(("w"
-         "Default template"
-         entry
-         (file+headline "~/org/capture.org" "Notes")
-         "* %^{Title}\n\n  Source: %u, %c\n\n  %i"
-         :empty-lines 1)
-        ("l" "A link, for reading later." entry (file+headline "~/org/inbox.org" "Reading List") "* %:description\n%u\n\n%c\n\n%i" :empty-lines 1)
-        ))
+        '(("w"
+           "Default template"
+           entry
+           (file+headline "~/org/capture.org" "Notes")
+           "* %^{Title}\n\n  Source: %u, %c\n\n  %i"
+           :empty-lines 1)
+          ("l" "A link, for reading later." entry (file+headline "~/org/inbox.org" "Reading List") "* %:description\n%u\n\n%c\n\n%i" :empty-lines 1)
+          ))
 
 
   ;; (defun org-roam-dailies-capture-today ()
