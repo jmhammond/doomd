@@ -7,6 +7,8 @@
 ;; (package! builtin-package :disable t)
 
 
+(package! math-preview :recipe (:host gitlab :repo "matsievskiysv/math-preview"))
+
 ;; (package! org-reveal :recipe (:host github :repo "yjwen/org-reveal"))
 ;; (package! ox-twsb :recipe (:host github :repo "marsmining/ox-twbs"))
 ;; (package! auctex)

@@ -260,6 +260,21 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
 ;; )
 ;;
 
+;; Math-preview
+
+(setq math-preview-tex-macros
+   '(("ddx" "\\frac{d#2}{d#1}" 2 "t")
+     ("and" . "\\mbox{ and }"))
+   math-preview-tex-marks
+   '(("\\begin{equation}" "\\end{equation}")
+     ("\\begin{equation*}" "\\end{equation*}")
+     ("\\[" "\\]")
+     ("$$" "$$")
+     ("<m>" "</m>")
+     ("<me>" "</me>")
+     ("<mrow>" "</mrow>")))
+
+
 ;; For macos auctex building
 (setenv "PATH" (concat (getenv "PATH") ":/Library/TeX/texbin/"))
 (setq exec-path (append exec-path '("/Library/TeX/texbin/")))
