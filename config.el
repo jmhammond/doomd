@@ -12,14 +12,6 @@
       ;; doom-serif-font (font-spec :family "Baskerville" :height 45)
       ;; doom-font (font-spec :family "Input Mono" :size 14)
       ;; doom-variable-pitch-font (font-spec :family "Source Code Variable" :size 14)
-      ;doom-theme 'doom-nord-light
-      ;doom-theme 'doom-dark+
-      ;doom-theme 'doom-zenburn
-      ;doom-theme 'doom-vibrant
-      ;doom-theme 'doom-dracula
-      ;doom-theme 'doom-material
-      ;;doom-theme 'doom-one-light
-;     ; doom-theme 'doom-vibrant
       +doom-dashboard-banner-file (expand-file-name "coffeesquirrel.png" doom-private-dir)
 
       initial-frame-alist '((top . 1) (left . 1) (width . 100) (height . 40))
@@ -39,10 +31,11 @@
       emacs-everywhere-paste-p nil
       )
 
-
-
 (when (equal system-type 'darwin)
   (setq insert-directory-program "/opt/homebrew/bin/gls")
+  ;; For macos auctex building
+  (setenv "PATH" (concat (getenv "PATH") ":/Library/TeX/texbin/"))
+  (setq exec-path (append exec-path '("/Library/TeX/texbin/")))
 
   ;; I want scrollbars on macos
   (setq scroll-bar-mode 'right)
@@ -58,7 +51,8 @@
         ns-right-option-modifier  'meta)
 )
 ;
-; The following makes emacs follow (correctly!) the links setup in Obsidian
+
+; The following makes emacs follow (correctly!) the links setup in Obsidian and Logseq
 (setq markdown-enable-wiki-links t
       markdown-wiki-link-search-type '(parent-directories sub-directories)
       markdown-enable-math t
@@ -77,9 +71,6 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
   (dolist (hook mixed-pitch-modes)
     (add-hook (intern (concat (symbol-name hook) "-hook")) #'mixed-pitch-mode)))
 (add-hook 'doom-init-ui-hook #'init-mixed-pitch-h)
-;;
-;; (autoload #'mixed-pitch-serif-mode "mixed-pitch"
-;;   "Change the default face of the current buffer to a serifed variable pitch, while keeping some faces fixed pitch." t)
 
 (after! mixed-pitch
   (defface variable-pitch-serif
@@ -99,7 +90,6 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
 ; calculator! I need to actually use it sometimes...
 (setq calc-angle-mode 'rad  ; radians are rad
       calc-symbolic-mode t)
-
 
 ; split windows, be asked what to load:
 (setq evil-vsplit-window-right t
@@ -137,7 +127,7 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
   (treemacs-follow-mode t)
   (treemacs-indent-guide-mode t)
   (setq treemacs-resize-icons 44
-        treemacs-width 35
+        treemacs-width 30
         treemacs-width-is-initially-locked nil
         treemacs-indent-guide-style 'line
         treemacs-file-ignore-extensions
@@ -175,30 +165,7 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
         evil-move-cursor-back nil       ; Don't move the block cursor when toggling insert mode; this is truly game changing!
         evil-kill-on-visual-paste nil)) ; Don't put overwritten text in the kill ring
 
-;; (after! centaur-tabs
-;;   (centaur-tabs-mode -1)
-;;   (setq centaur-tabs-height 24
-;;         centaur-tabs-set-icons t
-;;         ;centaur-tabs-modified-marker "o"
-;;         centaur-tabs-close-button "×"
-;;         centaur-tabs-set-bar 'under
-;;         centaur-tabs-plain-icons t
-;;         centaur-tabs-style "rounded"
-;;         centaur-tabs-gray-out-icons 'buffer)
-;;   (centaur-tabs-change-fonts "Baskerville" 180))
-;; (setq x-underline-at-descent-line t)
-;;
 
-                                        ;(after! all-the-icons
-                                        ;  (setcdr (assoc "ptx" all-the-icons-extension-icon-alist)
-                                        ;          (cdr (assoc "xml" all-the-icons-extension-icon-alist))))
-                                        ;(after! all-the-icons
-                                        ;  (all-the-icons-wicon   "ptx"))
-                                        ;(insert (all-the-icons-icon-for-file "foo.js"))
-;; Inserts a javascript icon
-;; #("js-icon" 0 1 (display (raise -0.24) face (:family "alltheicon" :height 1.08 :foreground "#FFD446")))
-;;
-;;
 ;;
 ;; hopefully don't let doom upgrade compile natively every package
 (setq native-comp-deferred-compilation t)
@@ -260,8 +227,8 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
 ;; )
 ;;
 
-;; Math-preview
 
+;; Math-preview; this package works even in nxml mode!
 (setq math-preview-tex-macros
    '(("ddx" "\\frac{d#2}{d#1}" 2 "t")
      ("and" . "\\mbox{ and }"))
@@ -274,10 +241,6 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
      ("<me>" "</me>")
      ("<mrow>" "</mrow>")))
 
-
-;; For macos auctex building
-(setenv "PATH" (concat (getenv "PATH") ":/Library/TeX/texbin/"))
-(setq exec-path (append exec-path '("/Library/TeX/texbin/")))
 
 
 ;; compile PreText documents via `pretext build'
@@ -337,13 +300,6 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
                   (message "No Compilation Errors.")))))
 
 
-;; 3-10-22: Note: this was back in ChromeOS crouton days. I think I'm okay to leave a window unsaved when jumping.
-;; and when losing focus, enter normal mode go ahead and save
-;; (add-hook! '(doom-switch-window-hook
-;;              doom-switch-buffer-hook)
-;;   ;; (evil-normal-state t) ;; this breaks company's popup window, so disable
-;;   (save-some-buffers t))
-
 (add-to-list 'auto-mode-alist '("~/TheArchive/.*\\.md\\'" . org-mode))
 
 
@@ -367,67 +323,8 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
   (require 'org-re-reveal-ref)
 
 
-;;;  ; this super doesn't work. :-(
-  (setq org-capture-templates
-        '(("w"
-           "Default template"
-           entry
-           (file+headline "~/org/capture.org" "Notes")
-           "* %^{Title}\n\n  Source: %u, %c\n\n  %i"
-           :empty-lines 1)
-          ("l" "A link, for reading later." entry (file+headline "~/org/inbox.org" "Reading List") "* %:description\n%u\n\n%c\n\n%i" :empty-lines 1)
-          ))
-
-
-  ;; (defun org-roam-dailies-capture-today ()
-  ;;   "Capture a note into the daily note for today."
-  ;;   (interactive)
-  ;;   (let ((org-roam-capture-templates org-roam-dailies-capture-templates)
-  ;;         (org-roam-capture--info (list (cons 'time (current-time))))
-  ;;         (org-roam-capture--context 'dailies))
-  ;;     (org-roam--capture)))
-
-  ;; (setq org-roam-dailies-capture-templates
-  ;;       '(("d" "daily" plain (function org-roam-capture--get-point)
-  ;;          "* %?"
-  ;;          :file-name "%<%Y-%m-%d>"
-  ;;          :head "#+TITLE: %<%Y-%m-%d>")))
-
-
-  ;; (use-package! org-roam
-  ;;   :after org
-  ;;   :demand t
-  ;;   :commands
-  ;;   (org-roam-buffer
-  ;;    org-roam-setup
-  ;;    org-roam-capture
-  ;;    org-roam-node-find)
-  ;;   :config
-  ;;   ;;(setq org-roam-mode-sections
-  ;;   ;;      (list #'org-roam-backlinks-insert-section
-  ;;   ;;            #'org-roam-reflinks-insert-section
-  ;;   ;;            #'org-roam-unlinked-references-insert-section))
-  ;;   (org-roam-setup))
-
-  ;;
-  ;;
-  ;; My attempt at capturing to the daily note
-  ;; (defun visit-the-daily-note()
-  ;;   "Visit a new file named by the current timestamp"
-  ;;   (interactive)
-  ;;   (let* (
-  ;;          (curr-date-stamp (format-time-string "%Y-%m-%d.org"))
-  ;;          (file-name (expand-file-name curr-date-stamp "~/Documents/org/roam/")))
-  ;;     (set-buffer (org-capture-target-buffer file-name))
-  ;;     (goto-char (point-max))))
-
-  ;; (setq org-capture-templates '(("n" "Note" entry (function visit-the-daily-note)
-  ;;                                "* %?\n")))
-  ;;
-
-
   ;; obsidan link handling for obsidian:// links
-  (defun org-obidian-link-open (slash-message-id)
+  (defun org-obsidian-link-open (slash-message-id)
     "Handler for org-link-set-parameters that opens a obsidian:// link in obsidian"
     ;; remove any / at the start of slash-message-id to create real note-id
     (let ((message-id
@@ -439,7 +336,7 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
                message-id
                "\" activate"))))
   ;; on obsdian://aoeu link, this will call handler with //aoeu
-  (org-link-set-parameters "obsidian" :follow #'org-obidian-link-open)
+  (org-link-set-parameters "obsidian" :follow #'org-obsidian-link-open)
 
   ;; Email link handlink for message:// links
   (defun org-message-mail-open (slash-message-id)
