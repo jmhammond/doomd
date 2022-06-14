@@ -154,6 +154,7 @@
        (org               ; organize your plain life in plain text
         +babel
         +hugo
+        +pretty
         +present)
         ;+roam)
        ;;php               ; perl's insecure younger brother

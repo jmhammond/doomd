@@ -19,11 +19,10 @@
  '(jdee-db-requested-breakpoint-face-colors (cons "#F0F4FC" "#4F894C"))
  '(jdee-db-spec-breakpoint-face-colors (cons "#F0F4FC" "#B8C5DB"))
  '(objed-cursor-color "#99324B")
- '(org-agenda-files
-   '("~/Library/Mobile Documents/iCloud~com~appsonthemove~beorg/Documents/org/inbox.org" "/Users/john/org/2020-04-29.org" "/Users/john/org/2020-04-30.org" "/Users/john/org/2020-05-01.org" "/Users/john/org/2020-05-09.org" "/Users/john/org/2020-05-22.org" "/Users/john/org/20200429070415-a_simple_test.org" "/Users/john/org/CrochetPatterns.org" "/Users/john/org/gtd.org" "/Users/john/org/inbox.org" "/Users/john/org/journal.org" "/Users/john/org/somedaymaybe.org" "/Users/john/org/testingorg.org" "/Users/john/org/tickler.org" "/Users/john/org/todo.org"))
  '(pdf-view-midnight-colors (cons "#3B4252" "#E5E9F0"))
  '(rustic-ansi-faces
    ["#E5E9F0" "#99324B" "#4F894C" "#9A7500" "#3B6EA8" "#97365B" "#398EAC" "#3B4252"])
+ '(safe-local-variable-values '((line-spacing . 3)))
  '(vc-annotate-background "#E5E9F0")
  '(vc-annotate-color-map
    (list
@@ -46,7 +45,7 @@
     (cons 340 "#AEBACF")
     (cons 360 "#AEBACF")))
  '(vc-annotate-very-old-color nil)
- '(warning-suppress-types '((comp) (comp) (comp))))
+ '(warning-suppress-types '((comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
