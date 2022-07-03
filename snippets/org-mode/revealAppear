@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: revealAppear
+# uuid: revealAppear1
+# key: reveal
+# condition: t
+# --
+#+ATTR_REVEAL: :frag (appear)

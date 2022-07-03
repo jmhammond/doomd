@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: revealSplit
+# uuid: revealSplit111
+# key: split
+# condition: t
+# --
+#+REVEAL: split

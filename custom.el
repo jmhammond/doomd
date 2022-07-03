@@ -19,10 +19,14 @@
  '(jdee-db-requested-breakpoint-face-colors (cons "#F0F4FC" "#4F894C"))
  '(jdee-db-spec-breakpoint-face-colors (cons "#F0F4FC" "#B8C5DB"))
  '(objed-cursor-color "#99324B")
+ '(org-agenda-files
+   '("~/emacsCalendar.org" "/Users/john/Library/Mobile Documents/iCloud~com~appsonthemove~beorg/Documents/org/gtd.org" "/Users/john/Library/Mobile Documents/iCloud~com~appsonthemove~beorg/Documents/org/inbox.org" "/Users/john/Library/Mobile Documents/iCloud~com~appsonthemove~beorg/Documents/org/init.org" "/Users/john/Library/Mobile Documents/iCloud~com~appsonthemove~beorg/Documents/org/tickler.org"))
  '(pdf-view-midnight-colors (cons "#3B4252" "#E5E9F0"))
  '(rustic-ansi-faces
    ["#E5E9F0" "#99324B" "#4F894C" "#9A7500" "#3B6EA8" "#97365B" "#398EAC" "#3B4252"])
- '(safe-local-variable-values '((line-spacing . 3)))
+ '(safe-local-variable-values
+   '((org-latex-pdf-process "xelatex -shell-escape -interaction=nonstopmode -output-directory=%o %f" "xelatex -shell-escape -interaction=nonstopmode -output-directory=%o %f" "xelatex -shell-escape -interaction=nonstopmode -output-directory=%o %f")
+     (line-spacing . 3)))
  '(vc-annotate-background "#E5E9F0")
  '(vc-annotate-color-map
    (list
