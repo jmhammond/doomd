@@ -515,6 +515,10 @@ See also `org-save-all-org-buffers'"
 ) ;; end org-mode
 
 
+(setq! orderless-matching-styles
+       '(orderless-literal orderless-regexp orderless-flex)
+       )
+
 
 ;; In case you forget, me, line-numbers are terrible for org files and emacs performance
 ;; ... but I love the extra space in the gutter
@@ -527,10 +531,11 @@ See also `org-save-all-org-buffers'"
 ;; Make org files look prettier with modus themes
 ;; https://systemcrafters.net/emacs-from-scratch/the-modus-themes/
 (setq modus-themes-headings
-      '((1 . (rainbow overline background 1.3))
-        (2 . (rainbow background 1.2))
-        (3 . (rainbow  1.1))
-        (t . (rainbow 1.0))))
+      '((1 . (rainbow overline 1.2))
+        (2 . (rainbow 1.1))
+        (t . (rainbow  1.0))
+        ))
+        ;(t . (rainbow 1.0))))
 (setq modus-themes-scale-headings t)
 
 ;; Calendar and such, hopefully🤞
