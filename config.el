@@ -9,8 +9,8 @@
       doom-theme 'modus-vivendi
       ;doom-theme 'modus-operandi
       ;; doom-font (font-spec :family "Fira Code" :size 16)
-      ;; doom-variable-pitch-font (font-spec :family "Baskerville" :size 19)
-      ;; doom-serif-font (font-spec :family "Baskerville" :height 45)
+      ; doom-variable-pitch-font (font-spec :family "Inconsolata" :size 19)
+      ; doom-serif-font (font-spec :family "Inconsolata" :height 45)
       ;; doom-font (font-spec :family "Input Mono" :size 14)
       ;; doom-variable-pitch-font (font-spec :family "Source Code Variable" :size 14)
       +doom-dashboard-banner-file (expand-file-name "coffeesquirrel.png" doom-private-dir)
@@ -51,7 +51,6 @@
         mac-right-option-modifier 'meta
         ns-right-option-modifier  'meta)
 )
-;
 
 ; The following makes emacs follow (correctly!) the links setup in Obsidian and Logseq
 (setq markdown-enable-wiki-links t
@@ -205,9 +204,6 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
 ;; automatically update buffers if the file has changed on the disk;
 (global-auto-revert-mode t)
 
-;; and save when emacs loses focus or changes buffers
-(super-save-mode +1)
-
 ;; soft wrap everywhere
 ;; (note I also needed something in init.el)
 (global-visual-line-mode +1)
@@ -307,24 +303,43 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
 (add-to-list 'auto-mode-alist '("~/TheArchive/.*\\.md\\'" . org-mode))
 
 
-
-
 (map! :leader
       ;; prefer the unshifted semicolon for Ex commands
       ";" 'execute-extended-command
       ":" 'eval-expression)
+(map! :i
+      ;; use caps(ctrl) + ; to trigger the M-x command list
+      "C-;" 'execute-extended-command)
+;(map! :mode org-mode :n "S-TAB" 'org-cycle)
+
 
 ;; this keymap is similar to the evil default "z i" for org-toggle-inline-images
-(map! :mode org-mode :n "z p" 'org-toggle-latex-fragment)
+; (map! :mode org-mode :n "S- p" 'org-toggle-latex-fragment)
 
-(use-package! org-ql :after org)
+; (use-package! org-ql :after org)
+
+;; autosave org files
+;; (add-hook 'org-mode-hook
+;;           (lambda ()
+;;             (when (file-in-directory-p (buffer-file-name) "~/org")
+;;               (salv-mode))))
+;; this is via https://www.reddit.com/r/emacs/comments/vqk41j/comment/iestdam/?utm_source=reddit&utm_medium=web2x&context=3
+(auto-save-visited-mode 1)  ;; auto save everything
+
+;; (setq-default auto-save-visited-mode nil)
+;; (add-hook 'org-mode-hook
+;;           (lambda ()
+;;             (when (file-in-directory-p (buffer-file-name) "~/org")
+;;               (setq-local auto-save-visited-mode t))))
 
 (after! org
 
   ;; Don't delete hidden subtrees:
   (setq org-ctrl-k-protect-subtree t)
 
-  (require 'org-ref)
+  ;; for ~org-cite~
+  (setq! org-cite-csl-styles-dir "~/Zotero/styles")
+
   (require 'org-mouse) ;; allows clicking headlines to open/close
 
   ;; obsidan link handling for obsidian:// links
@@ -371,7 +386,7 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
   (setq org-capture-templates
         `(("i" "Inbox" entry (file "inbox.org")
            "* TODO %?\n %l")))
-  (setq org-refile-targets '( ; current file
+  (setq org-refile-targets '((nil :maxlevel . 5) ; current file
                              ("gtd.org" :maxlevel . 2)
                              (org-agenda-files :maxlevel . 2)))
 
@@ -380,18 +395,20 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
 
 
   ;; autosave on refile
-  (defun gtd-save-org-buffers ()
-    "Save `org-agenda-files' buffers without user confirmation.
-See also `org-save-all-org-buffers'"
-    (interactive)
-    (message "Saving org-agenda-files buffers...")
-    (save-some-buffers t (lambda ()
-                           (when (member (buffer-file-name) org-agenda-files)
-                             t)))
-    (message "Saving org-agenda-files buffers... done"))
-  (advice-add 'org-refile :after
-              (lambda (&rest _)
-                (gtd-save-org-buffers)))
+;;   (defun gtd-save-org-buffers ()
+;;     "Save `org-agenda-files' buffers without user confirmation.
+;; See also `org-save-all-org-buffers'"
+;;     (interactive)
+;;     (message "Saving org-agenda-files buffers...")
+;;     (save-some-buffers t (lambda ()
+;;                            (when (member (buffer-file-name) org-agenda-files)
+;;                              t)))
+;;     (message "Saving org-agenda-files buffers... done"))
+;;   (advice-add 'org-refile :after
+;;               (lambda (&rest _)
+;;                 (gtd-save-org-buffers)))
+  ;; refile faster with <spc> m r
+  ;(map! :leader :desc "org-refile" "m r" #'org-refile)
 
   (setq org-archive-location "~/org/archive/%s_archive::")
 
@@ -403,6 +420,11 @@ See also `org-save-all-org-buffers'"
           (todo   . " ")
           (tags   . " %i %-12:c")
           (search . " %i %-12:c")))
+
+  ;; in the agenda, hide the todo state
+  ; (setq org-agenda-todo-keyword-format "")
+  ;; ;; hide done tasks
+  (setq org-agenda-skip-scheduled-if-done "")
 
   (setq org-agenda-custom-commands
         '(("Q" . "Custom queries") ;; gives label to "Q"
@@ -539,10 +561,10 @@ See also `org-save-all-org-buffers'"
 (setq modus-themes-scale-headings t)
 
 ;; Calendar and such, hopefully🤞
-(setq diary-file "~/emacsCalendar")
-(load-file "~/src/org-mac-iCal/org-mac-iCal.el")
-(setq org-agenda-include-diary t)
-;(require 'org-mac-iCal)
+;; (setq diary-file "~/emacsCalendar")
+;; (load-file "~/src/org-mac-iCal/org-mac-iCal.el")
+;; ;(setq org-agenda-include-diary t)
+;; (require 'org-mac-iCal)
 
 ;; caching has been causing problems with big org files...
 (setq org-element-use-cache nil)

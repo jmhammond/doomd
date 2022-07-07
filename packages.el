@@ -18,10 +18,10 @@
 ;; (package! ox-twsb :recipe (:host github :repo "marsmining/ox-twbs"))
 ;; (package! auctex)
 ;;
-(package! ox-twbs)
+;; (package! ox-twbs)
 
-(package! org-super-agenda
-  :recipe (:host github :repo "alphapapa/org-super-agenda"))
+;; (package! org-super-agenda
+;;   :recipe (:host github :repo "alphapapa/org-super-agenda"))
 
 ;;(package! org-rifle
 ;;   :recipe (:host github :repo "alphapapa/org-rifle"))
@@ -35,14 +35,15 @@
 ;; (package! j-emacs-everywhere
 ;;   :recipe (:host github :repo "jmhammond/emacs-everywhere"))
 
-(package! org-ref)
-; (package! org-re-reveal-ref)
+;; (package! org-ref)
+;; (package! org-re-reveal-ref)
 
 ;; ; I have never used  jk to ESCape in my life. I didn't know doom included it...
 (package! evil-escape :disable t)
 
 ;; auto save when losing focus and (emacs)window changing
-(package! super-save :recipe (:host github :repo "bbatsov/super-save"))
+;; (package! super-save :recipe (:host github :repo "bbatsov/super-save"))
+;(package! salv-mode :recipe (:host github :repo "alphapapa/salv.el"))
 
 ;; (package! alpha-org ;; /u/alphapapa's super org starter kit
 ;;   :recipe (:host github :repo "alphapapa/alpha-org"))
