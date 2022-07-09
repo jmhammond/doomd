@@ -325,7 +325,32 @@ unmap tab from company and yas-snippets in insert mode:
       ;; use caps(ctrl) + ; to trigger the M-x command list
       "C-;" 'execute-extended-command)
 ;(map! :mode org-mode :n "S-TAB" 'org-cycle)
-(map! :leader :desc "Org-ql-find headline entry" "o f" #'org-ql-find-in-agenda)
+
+#+end_src
+
+Use ~org-ql~ to find headings in the current buffer or in the agenda files
+#+begin_src emacs-lisp
+(map! :leader :desc "Org-ql-find headline entry in file" "o f" #'org-ql-find)
+(map! :leader :desc "Org-ql-find headline entry in agenda" "o F" #'org-ql-find-in-agenda)
+#+end_src
+
+*** Maps that do more:
+Jump to the GTD todo list:  "<SPC> o t" (open (org?) todo)
+#+begin_src emacs-lisp
+(defun jq-open-todo-file ()
+  (interactive)
+  (find-file "~/org/gtd.org"))
+
+(map! :leader :desc "Open the GTD todo list" "o t" #'jq-open-todo-file)
+#+end_src
+
+Search my logseq notes with a helpful shortcut "<SPC> o l"  (open (org? oliver?) logseq)
+#+begin_src emacs-lisp
+(defun jq-search-in-logseq ()
+  (interactive)
+  (consult-ripgrep "~/logseq"))
+
+(map! :leader :desc "Search in logseq" "o l" #'jq-search-in-logseq)
 #+end_src
 
 ** Math preview
@@ -393,6 +418,11 @@ Compile PreText documents via `pretext build' by invoking ~C-c C-c~
 #+end_src
 
 ** Org
+*** Use org-ql package
+
+#+begin_src emacs-lisp
+(use-package! org-ql :after org)
+#+end_src
 *** Org gui adjustments
 Allows clicking headlines to
 #+begin_src emacs-lisp
@@ -448,7 +478,30 @@ Note that doom overwrites capture templates and refile targets, so you need it ~
   )
 #+end_src
 
+Exclude completed tasks from refile targets, from [[https://michael.englehorn.com/config.html][Michael Englehorn’s Emacs Configuration]] (via [[https://github.com/mwfogleman/.emacs.d/blob/master/michael.org][Tasshin Fogleman's configuration]])
+#+begin_src  emacs-lisp
+(defun bh/verify-refile-target ()
+  "Exclude todo keywords with a done state from refile targets"
+  (not (member (nth 2 (org-heading-components)) org-done-keywords)))
+
+(setq org-refile-target-verify-function 'bh/verify-refile-target)
+#+end_src
+
 **** Agenda
+First, I don't want to distinguish "blocked" tasks from non-blocked; I just want plain lists.  Org Agenda does a different (face) color for blocked tasks, and that confused me until I found this:
+#+begin_src emacs-lisp
+(setq org-agenda-dim-blocked-tasks nil)
+#+end_src
+
+Some basic agenda setup variables:
+#+begin_src emacs-lisp
+(setq org-agenda-show-future-repeats nil ;; possibly consider 'next
+      org-agenda-skip-deadline-if-done t
+      ; org-agenda-skip-scheduled-if-done t
+      )
+#+end_src
+
+
 This is mostly copy-pasted and needs a lot of adjustment
 #+begin_src emacs-lisp
   (setq org-agenda-hide-tags-regexp ".")
@@ -485,8 +538,10 @@ This is mostly copy-pasted and needs a lot of adjustment
           ("s" "Shopping / Buy List"
            ((tags "shopping")))
           ("p" "Projects List"
-           ((todo "PROJ"))
-           ((org-agenda-overriding-header "Active Projects List\n")))
+                    ((org-ql-block '(and (todo "PROJ")
+                              (not (tags "someday")))
+                     ((org-ql-block-header "Active Projects (excludes :someday:)"))
+                     )))
           ("g" "Today's Agenda"
            ((agenda ""
                     ((org-agenda-skip-function
