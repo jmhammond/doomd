@@ -196,7 +196,7 @@
        ;;twitter           ; twitter client https://twitter.com/vnought
 
        :config
-       ;;literate
+       literate   ;; turns my config.org ---> config.el. Nice.
        (default +bindings +smartparens))
 
 ; from henrik: you have to set it in ~/.doom.d/init.el, not config.el, because the docs of evil-respect-visual-line-mode say it needs to be set before evil has loaded
