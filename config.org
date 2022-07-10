@@ -3,7 +3,7 @@
 #+EMAIL: jmhammond@gmail.com
 #+LANGUAGE: en
 #+STARTUP: noinlineimages
-#+PROPERTY: header-args:emacs-lisp :tangle yes :cache yes :results silent :padline no
+#+PROPERTY: header-args:emacs-lisp :tangle yes :cache no :results silent :padline no
 #+OPTIONS: toc:nil
 
 * Literate configuration
@@ -424,14 +424,15 @@ Compile PreText documents via `pretext build' by invoking ~C-c C-c~
 (use-package! org-ql :after org)
 #+end_src
 *** Org gui adjustments
-Allows clicking headlines to
+Allows clicking headline bullets to fold/unfold
 #+begin_src emacs-lisp
 (require 'org-mouse)
 #+end_src
 
-Don't delete hidden subtrees:
+Protect the files from accidentally editing or deleting things we don't see.
 #+begin_src emacs-lisp
 (setq org-ctrl-k-protect-subtree t)
+(setq org-fold-catch-invisible-edits 'show-and-error)
 #+end_src
 
 Deal with line numbers and padding... hopefully I can get this to work!
@@ -445,8 +446,9 @@ Deal with line numbers and padding... hopefully I can get this to work!
   ;(add-hook 'org-mode-hook #'visual-fill-column-mode)
 #+end_src
 
+... and don't cache, that was causing problems for large files;
 #+begin_src emacs-lisp
-  (setq org-fold-catch-invisible-edits 'show-and-error)
+(setq org-element-use-cache nil)
 #+end_src
 
 *** GTD , todo and agenda
@@ -563,8 +565,7 @@ First, we ask org to render our links:
       )
 #+end_src
 
-
-This is the same code, just with three different handlers; I should probably make it more generic, but I don't really care.
+This is the same code, just with different handlers; I should probably make it more generic, but I don't really care.
 
 Obsidian:
 #+begin_src emacs-lisp
@@ -581,6 +582,23 @@ Obsidian:
                message-id
                "\" activate"))))
   (org-link-set-parameters "obsidian" :follow #'org-obsidian-link-open)
+#+end_src
+
+Logseq:
+#+begin_src emacs-lisp
+  ;; obsidan link handling for logseq:// links
+  (defun org-logseq-link-open (slash-message-id)
+    "Handler for org-link-set-parameters that opens a logseq:// link in logseq"
+    ;; remove any / at the start of slash-message-id to create real note-id
+    (let ((message-id
+           (replace-regexp-in-string (rx bos (* "/"))
+                                     ""
+                                     slash-message-id)))
+      (do-applescript
+       (concat "tell application \"Logseq\" to open location \"logseq://"
+               message-id
+               "\" activate"))))
+  (org-link-set-parameters "logseq" :follow #'org-logseq-link-open)
 #+end_src
 
 Emails / message://
