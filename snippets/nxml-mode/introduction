@@ -1,13 +1,11 @@
 # -*- mode: snippet -*-
 # name: introduction
-# uuid:
+# uuid: a00cff31-8248-4cbb-a7b4-be8ffbd29169
 # key: intro
 # condition: t
 # --
 <introduction>
-  <statement>
-    <p>
-      $0
-    </p>
-  </statement>
+  <p>
+    $0
+  </p>
 </introduction>

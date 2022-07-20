@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: aside
+# uuid: 577abcc8-1d0d-44eb-95c3-be30ff4d181e
+# key: aside
+# --
+<aside>
+  <p>
+    $0
+  </p>
+</aside>
