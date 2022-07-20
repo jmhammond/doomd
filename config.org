@@ -237,7 +237,8 @@ Autosave everything
 ... but don't delete trailing whitespace. Because autosave runs sometimes when I pause after a word, I end up with sentences thatlooklikethis and have to remember to type an extra space after the save.
 The mode responsible was ~ws-butler~ which cleans up whitespace. That's normally fine /except/ when I'm in the middle of a thought, when it's annoying. This flag here will keep the whitespace at the cursor in the ~buffer~ but remove it from the saved ~file~. So I can keep going and do my thing and keep typing and the white space will eventually stick around, but it will also be doing the right thing for all the extra whitespace I don't want to keep around.
 #+begin_src emacs-lisp
-(setq ws-butler-keep-whitespace-before-point t)
+(after! ws-butler
+  (setq ws-butler-keep-whitespace-before-point t))
 #+end_src 
 
 #+begin_src emacs-lisp
@@ -598,6 +599,12 @@ This is mostly copy-pasted and needs a lot of adjustment
           ))
 #+end_src
 
+*** Org and logseq
+Adding this will enable me in emacs to link to subheadings in such a way that logseq will be able to open them:
+#+begin_src emacs-lisp
+(require 'org-id)
+(setq org-id-link-to-org-use-id t)
+#+end_src
 
 *** Org link handlers
 
