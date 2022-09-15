@@ -166,6 +166,11 @@ Apparently this helps somehow
 #+begin_src emacs-lisp
 (setq undo-tree-enable-undo-in-region nil)
 #+end_src
+
+And I really don't actually like the highlighted current line because it's creating too much noise in org-mode...?
+#+begin_src emacs-lisp
+(hl-line-mode -1)
+#+end_src
 ** Treemacs
 #+begin_src emacs-lisp
 (with-eval-after-load 'treemacs
@@ -382,7 +387,7 @@ Search my logseq notes with a helpful shortcut "<SPC> o l"  (open (org? oliver?)
 #+end_src
 
 ** Math preview
-The Math-preview package works even in nxml mode!
+The =math-preview= package works even in nxml mode!
 #+begin_src emacs-lisp
 (setq math-preview-tex-macros
    '(("ddx" "\\frac{d#2}{d#1}" 2 "t")
@@ -396,6 +401,85 @@ The Math-preview package works even in nxml mode!
      ("<me>" "</me>")
      ("<mrow>" "</mrow>")))
 #+end_src
+
+** Line Numbers and padding
+:PROPERTIES:
+:ID:       4021a029-e877-4c99-9ec5-f66cbda5a578
+:END:
+In =text-mode= buffers, I do not want line numbers, but I DO want the padding that the line numbers used to take up.  I like that extra space on the left side of the screen my eyes are accustomed to.
+
+
+[[https://discourse.doomemacs.org/t/setting-window-margins-for-particular-buffers-org-in-particular/2868/6][Code help thanks to tecosaur]] (since modified to the point where most is his, some is mine)
+#+begin_src emacs-lisp
+(defvar +text-mode-left-margin-width 3
+  "The `left-margin-width' to be used in `text-mode' buffers.")
+
+(defun +setup-text-mode-left-margin ()
+  (when (derived-mode-p 'text-mode)
+    (setq left-margin-width (if display-line-numbers
+                                0 +text-mode-left-margin-width))
+    (set-window-buffer (get-buffer-window (current-buffer))
+                       (current-buffer))))
+#+end_src
+
+Now we just need to hook this up to all the events which could either indicate a change in the conditions, or a require the setup to be re-applied.  But, if I'm in =writeroom-mode=, this creates a conflict, so we attach hooks to writeroom enable and disable
+
+Default, emacs opening:
+#+begin_src emacs-lisp
+(add-hook 'window-configuration-change-hook #'+setup-text-mode-left-margin)
+(add-hook 'display-line-numbers-mode-hook #'+setup-text-mode-left-margin)
+(add-hook 'text-mode-hook #'+setup-text-mode-left-margin)
+#+end_src
+
+For entering or leaving =writeroom-mode=
+#+begin_src emacs-lisp
+(defun +leaving-writeroom-mode-left-margin ()
+  (add-hook 'window-configuration-change-hook #'+setup-text-mode-left-margin)
+  (add-hook 'display-line-numbers-mode-hook #'+setup-text-mode-left-margin)
+  (add-hook 'text-mode-hook #'+setup-text-mode-left-margin)
+  )
+
+(defun +entering-writeroom-mode-left-margin ()
+  (remove-hook 'window-configuration-change-hook #'+setup-text-mode-left-margin)
+  (remove-hook 'display-line-numbers-mode-hook #'+setup-text-mode-left-margin)
+  (remove-hook 'text-mode-hook #'+setup-text-mode-left-margin)
+  )
+
+(add-hook 'writeroom-mode-disable-hook #'+setup-text-mode-left-margin)
+(add-hook 'writeroom-mode-disable-hook #'+leaving-writeroom-mode-left-margin)
+
+(add-hook 'writeroom-mode-enable-hook #'+entering-writeroom-mode-left-margin)
+#+end_src
+
+
+There’s one little niggle with Doom, as doom/toggle-line-numbers doesn’t run display-line-numbers-mode-hook, so some advice is needed.
+#+begin_src emacs-lisp
+(defadvice! +doom/toggle-line-numbers--call-hook-a ()
+  :after #'doom/toggle-line-numbers
+  (run-hooks 'display-line-numbers-mode-hook))
+#+end_src
+
+Finally, we remove line numbers from text modes:
+#+begin_src emacs-lisp
+(remove-hook 'text-mode-hook #'display-line-numbers-mode)
+#+end_src
+
+** Writeroom mode
+Tweaks to make =writeroom-mode= nicer for me.
+
+By default, Doom's =zen= package scales up font a lot, let's scale it back down a smidge.
+#+begin_src emacs-lisp
+(setq +zen-text-scale 0.8)
+#+end_src
+
+Interestingly, the =+zen-text-scale= doesn't impact code blocks like the one you see above; those faces are different.  I don't think that (in general) I'll be using =writeroom-mode= for writing mixed documents like this one, so it'll be fine for now.
+
+
+Now, text isn't actually centered because =writeroom-mode= adds the line number width to the left side, causing it to visually balance if you had line numbers, but I don't, so let's ask it not to:
+#+begin_src emacs-lisp
+(setq writeroom-full-line-number-width 0)
+#+end_src
+
 
 * Languages
 ** Language Server Protocol
@@ -421,7 +505,7 @@ Still haven't settled on what I actually want on this below, but I also don't sp
 ;; (setq TeX-electric-math (cons "$" "$"))
 #+end_src
 
-Ignore unneccessary tex files and such in find-file
+Ignore unnecessary tex files and such in find-file
 #+begin_src emacs-lisp
 (after! counsel
   (setq counsel-find-file-ignore-regexp "\\(?:^#\\)\\|\\(?:[#~]$\\)\\|\\(?:^Icon?\\)\\|\\(aux\\)\\|\\(fdb_latexmk\\)\\|\\(fls\\)\\|\\(out\\)\\|\\(synctex\\)\\|\\(pdf\\)\\|\\(log\\)"))
@@ -471,41 +555,7 @@ Protect the files from accidentally editing or deleting things we don't see.
 (setq org-element-use-cache nil)
 #+end_src
 
-*** Deal with line numbers and padding... hopefully I can get this to work!
-[[https://discourse.doomemacs.org/t/setting-window-margins-for-particular-buffers-org-in-particular/2868/6][Code thanks to tecosaur]]
-#+begin_src emacs-lisp
-(defvar +text-mode-left-margin-width 3
-  "The `left-margin-width' to be used in `text-mode' buffers.")
-
-(defun +setup-text-mode-left-margin ()
-  (when (derived-mode-p 'text-mode)
-    (setq left-margin-width (if display-line-numbers
-                                0 +text-mode-left-margin-width))
-    (set-window-buffer (get-buffer-window (current-buffer))
-                       (current-buffer))))
-#+end_src
-
-Now we just need to hook this up to all the events which could either indicate a change in the conditions, or a require the setup to be re-applied.
-
-#+begin_src emacs-lisp
-(add-hook 'window-configuration-change-hook #'+setup-text-mode-left-margin)
-(add-hook 'display-line-numbers-mode-hook #'+setup-text-mode-left-margin)
-(add-hook 'text-mode-hook #'+setup-text-mode-left-margin)
-#+end_src
-
-There’s one little niggle with Doom, as doom/toggle-line-numbers doesn’t run display-line-numbers-mode-hook, so some advice is needed.
-#+begin_src emacs-lisp
-(defadvice! +doom/toggle-line-numbers--call-hook-a ()
-  :after #'doom/toggle-line-numbers
-  (run-hooks 'display-line-numbers-mode-hook))
-#+end_src
-
-Finally, we remove line numbers from text modes:
-#+begin_src emacs-lisp
-(remove-hook 'text-mode-hook #'display-line-numbers-mode)
-#+end_src
-
-*** GTD , todo and agenda
+*** GTD, todo and agenda
 Basic directory setup
 #+begin_src emacs-lisp
   (setq org-directory "~/org")
