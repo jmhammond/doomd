@@ -75,7 +75,7 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
 ** Theme
 The modus themes are great. This /vivendi/ is dark and /operandi/ is light. You can switch between them with ~M-x modus-themes-toggle~
 #+begin_src emacs-lisp
-(setq doom-theme 'modus-vivendi)
+(setq doom-theme 'modus-operandi)
 #+end_src
 
 ... but ~solaire-mode~ that doom ships conflicts with it, so disable that:
@@ -93,6 +93,11 @@ Pretty headlines for orgmode
         ))
         ;(t . (rainbow 1.0))))
 (setq modus-themes-scale-headings t)
+#+end_src
+
+We could choose to darken the org-blocks.  At this point, I choose not to.
+#+begin_src emacs-lisp
+(setq modus-themes-org-blocks nil) ;; 'gray-background)
 #+end_src
 
 *** TODO For the completion UI, I want more distinct visibility for the selected row
@@ -234,9 +239,10 @@ And I really don't actually like the highlighted current line because it's creat
 ** Autosave and auto-revert
 I want to enable auto save so I don't lose changes; I also want to autorevert buffers that change on the disk because I'm using beorg on the phone, and if I mark a task as DONE, I want that reflected.
 
-Autosave everything
-#+begin_src emacs-lisp
-(auto-save-visited-mode 1)
+Autosave everything  (but after 20 seconds of idleness, so I can be in the middle of thoughts, say in org-capture window and not have it save and remove my C-c C-c functionality)
+#+begin_src emacs-lisp 
+(setq auto-save-visited-interval 20)
+(auto-save-visited-mode +1)
 #+end_src
 
 ... but don't delete trailing whitespace. Because autosave runs sometimes when I pause after a word, I end up with sentences thatlooklikethis and have to remember to type an extra space after the save.
@@ -263,6 +269,12 @@ let f, s, etc, find on visual lines
 (setq evil-cross-lines t)
 #+end_src
 
+and let myself go up and down on visual lines
+#+begin_src emacs-lisp
+(setq evil-respect-visual-line-mode t)
+#+end_src
+
+
 #+begin_src emacs-lisp
 (setq   evil-snipe-scope 'buffer)
 #+end_src
@@ -270,7 +282,7 @@ let f, s, etc, find on visual lines
 #+begin_src emacs-lisp
 (after! evil
   (setq evil-ex-substitute-global t
-        evil-move-cursor-back nil       ; Don't move the block cursor when toggling insert mode; this is truly game changing!
+        evil-move-cursor-back nil       ; Don't move the block cursor when toggling insert mode;
         evil-kill-on-visual-paste nil)) ; Don't put overwritten text in the kill ring)
 #+end_src
 
@@ -326,7 +338,7 @@ Make the bottom bar of emacs pretty.
                   (message "No Compilation Errors.")))))
 #+end_src
 
-** Key maps
+** Key maps / Key bindings
 # 🍎+N and 🍎+W (CMD+n CMD+w) should open/close a new /frame/ not a new buffer.  "Frame" means "window"
 #+begin_src emacs-lisp
 (map! :g "s-n" :desc "Open a new frame" #'make-frame-command)
@@ -374,7 +386,17 @@ Jump to the GTD todo list:  "<SPC> o t" (open (org?) todo)
   (interactive)
   (find-file "~/org/gtd.org"))
 
+(defun jq-open-inbox-file ()
+  (interactive)
+  (find-file "~/org/inbox.org"))
+
 (map! :leader :desc "Open the GTD todo list" "o t" #'jq-open-todo-file)
+(map! :leader :desc "Open the GTD inbox list" "o i" #'jq-open-inbox-file)
+#+end_src
+
+Open the GTD agenda
+#+begin_src emacs-lisp
+(map! :leader :desc "open agenda" "o a g" #'org-agenda)
 #+end_src
 
 Search my logseq notes with a helpful shortcut "<SPC> o l"  (open (org? oliver?) logseq)
@@ -384,6 +406,7 @@ Search my logseq notes with a helpful shortcut "<SPC> o l"  (open (org? oliver?)
   (consult-ripgrep "~/logseq"))
 
 (map! :leader :desc "Search in logseq" "o l" #'jq-search-in-logseq)
+(map! :leader :desc "Search my notes (in logseq)" "s n" #'jq-search-in-logseq)
 #+end_src
 
 ** Math preview
@@ -542,6 +565,11 @@ Compile PreText documents via `pretext build' by invoking ~C-c C-c~
 Allows clicking headline bullets to fold/unfold
 #+begin_src emacs-lisp
 (require 'org-mouse)
+#+end_src
+
+Block delimiters (#+begin and #+end) should not extend to the whole line.
+#+begin_src emacs-lisp
+(setq org-fontify-whole-block-delimiter-line nil)
 #+end_src
 
 Protect the files from accidentally editing or deleting things we don't see.
