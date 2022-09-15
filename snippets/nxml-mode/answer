@@ -3,6 +3,6 @@
 # uuid: 7817fdb8-eb5e-424f-a78d-d33ea459c7b0
 # key: ans
 # --
-<answer>
+<answer component="video">
   <video youtube="$0"/>
 </answer>

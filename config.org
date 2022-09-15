@@ -247,7 +247,8 @@ The mode responsible was ~ws-butler~ which cleans up whitespace. That's normally
 ** Vertico (like helm/ivy)
 #+begin_src emacs-lisp
 (setq! orderless-matching-styles
-       '(orderless-literal orderless-regexp orderless-flex)
+       ; '(orderless-literal orderless-regexp orderless-flex)
+       '(orderless-literal orderless-flex)
        )
 #+end_src
 ** Desired tweaks to evil-mode
@@ -321,6 +322,12 @@ Make the bottom bar of emacs pretty.
 #+end_src
 
 ** Key maps
+# 🍎+N and 🍎+W (CMD+n CMD+w) should open/close a new /frame/ not a new buffer.  "Frame" means "window"
+#+begin_src emacs-lisp
+(map! :g "s-n" :desc "Open a new frame" #'make-frame-command)
+(map! :g "s-w" :desc "Close a frame" #'delete-frame)
+#+end_src
+
 For treemacs
 #+begin_src emacs-lisp
 (map! :g "M-0" #'treemacs-select-window)
@@ -521,7 +528,7 @@ Note that doom overwrites capture templates and refile targets, so you need it ~
                              (org-agenda-files :maxlevel . 2)))
 
   (setq org-todo-keywords
-        '((sequence "TODO(t)" "NEXT(n)" "WAIT(h)" "SOMEDAY(s)" "PROJ(p)" "|" "DONE(d)")))
+        '((sequence "TODO(t)" "NEXT(n)" "WAIT(h)" "SOMEDAY(s)" "PROJ(p)" "|" "DONE(d) CANCEL(c)")))
 
   (setq org-log-done 'time)
   )
