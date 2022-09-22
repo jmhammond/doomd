@@ -339,10 +339,15 @@ Make the bottom bar of emacs pretty.
 #+end_src
 
 ** Key maps / Key bindings
-# 🍎+N and 🍎+W (CMD+n CMD+w) should open/close a new /frame/ not a new buffer.  "Frame" means "window"
+🍎+N and 🍎+W (CMD+n CMD+w) should open/close a new /frame/ not a new buffer.  "Frame" means "window"
 #+begin_src emacs-lisp
 (map! :g "s-n" :desc "Open a new frame" #'make-frame-command)
 (map! :g "s-w" :desc "Close a frame" #'delete-frame)
+#+end_src
+
+I also want CMD+k to  insert link (in org mode) because that's a common command in other programs, but not mapped to anything in emacs.
+#+begin_src emacs-lisp
+(map! :g "s-k" :desc "Insert a link" #'org-insert-link)
 #+end_src
 
 For treemacs
@@ -407,6 +412,7 @@ Search my logseq notes with a helpful shortcut "<SPC> o l"  (open (org? oliver?)
 
 (map! :leader :desc "Search in logseq" "o l" #'jq-search-in-logseq)
 (map! :leader :desc "Search my notes (in logseq)" "s n" #'jq-search-in-logseq)
+(map! :leader :desc "Search my notes (in logseq)" "n s" #'jq-search-in-logseq)
 #+end_src
 
 ** Math preview
@@ -507,7 +513,7 @@ Now, text isn't actually centered because =writeroom-mode= adds the line number 
 * Languages
 ** Language Server Protocol
 
-
+I haven't done anything to configure these; just asking Doom to install it for latex and python made it work out of the box. If I need custom configurations, I'll include those here.
 
 ** LaTeX
 #+begin_src emacs-lisp
@@ -555,13 +561,15 @@ Compile PreText documents via `pretext build' by invoking ~C-c C-c~
 (add-hook 'nxml-mode-hook 'my-make-compile)
 #+end_src
 
-** Org
-*** Use org-ql package
+* Org
+Although org is a "language", it has the most subsections, so it deserves to be its own topline heading.
+
+** Use org-ql package
 
 #+begin_src emacs-lisp
 (use-package! org-ql :after org)
 #+end_src
-*** Org gui adjustments
+** Org gui adjustments
 Allows clicking headline bullets to fold/unfold
 #+begin_src emacs-lisp
 (require 'org-mouse)
@@ -583,7 +591,7 @@ Protect the files from accidentally editing or deleting things we don't see.
 (setq org-element-use-cache nil)
 #+end_src
 
-*** GTD, todo and agenda
+** GTD, todo and agenda
 Basic directory setup
 #+begin_src emacs-lisp
   (setq org-directory "~/org")
@@ -593,7 +601,7 @@ Basic directory setup
   (setq org-archive-location "~/org/archive/%s_archive::")
 #+end_src
 
-**** Capture and refiles
+*** Capture and refiles
 Note that doom overwrites capture templates and refile targets, so you need it ~(after! org)~
 
 #+begin_src emacs-lisp
@@ -621,7 +629,7 @@ Exclude completed tasks from refile targets, from [[https://michael.englehorn.c
 (setq org-refile-target-verify-function 'bh/verify-refile-target)
 #+end_src
 
-**** Agenda
+*** Agenda
 First, I don't want to distinguish "blocked" tasks from non-blocked; I just want plain lists.  Org Agenda does a different (face) color for blocked tasks, and that confused me until I found this:
 #+begin_src emacs-lisp
 (setq org-agenda-dim-blocked-tasks nil)
@@ -684,14 +692,14 @@ This is mostly copy-pasted and needs a lot of adjustment
           ))
 #+end_src
 
-*** Org and logseq
+** Org and logseq
 Adding this will enable me in emacs to link to subheadings in such a way that logseq will be able to open them:
 #+begin_src emacs-lisp
 (require 'org-id)
 (setq org-id-link-to-org-use-id t)
 #+end_src
 
-*** Org link handlers
+** Org link handlers
 
 First, we ask org to render our links:
 #+begin_src emacs-lisp
