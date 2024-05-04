@@ -40,8 +40,8 @@ This file will be written when org does some ~org-tangle~-ing of the code. Hopef
 Default fonts first
 #+begin_src emacs-lisp
 (setq doom-font (font-spec :family "Source Code Pro" :size 16)
-      doom-variable-pitch-font (font-spec :family "Source Serif 4" )
-      doom-serif-font (font-spec :family "Source Serif 4" )
+      doom-variable-pitch-font (font-spec :family "Georgia" :size 18)
+      doom-serif-font (font-spec :family "Georgia" :size 18 )
       )
 #+end_src
 
@@ -56,7 +56,8 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
     (mixed-pitch-mode 1))
   (dolist (hook mixed-pitch-modes)
     (add-hook (intern (concat (symbol-name hook) "-hook")) #'mixed-pitch-mode)))
-(add-hook 'doom-init-ui-hook #'init-mixed-pitch-h)
+(add-hook 'doom-init-ui-hook #'init-mixed-pitch-h [[
+]] )
 
 (after! mixed-pitch
   (defface variable-pitch-serif
@@ -72,10 +73,21 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
     (let ((mixed-pitch-face 'variable-pitch-serif))
       (mixed-pitch-mode (or arg 'toggle)))))
 #+end_src
+** Tabs
+~~Using tabs like I had in VS Code... apparently I liked them well enough there.~~
+cancelled... I'm trying to roll back to less gui.  Use VS Code for GUI, emacs for emacs stuff.
+#+begin_src emacs-lisp
+;; (setq centaur-tabs-style "rounded")
+;; (setq centaur-tabs-set-icons t)
+;; (setq centaur-tabs-plain-icons t)
+;; (setq centaur-tabs-set-bar 'over)
+;; (setq centaur-tabs-set-modified-marker t)
+#+end_src
+'
 ** Theme
 The modus themes are great. This /vivendi/ is dark and /operandi/ is light. You can switch between them with ~M-x modus-themes-toggle~
 #+begin_src emacs-lisp
-(setq doom-theme 'modus-operandi)
+(setq doom-theme 'modus-vivendi)
 #+end_src
 
 ... but ~solaire-mode~ that doom ships conflicts with it, so disable that:
@@ -339,6 +351,9 @@ Make the bottom bar of emacs pretty.
 #+end_src
 
 ** Key maps / Key bindings
+:PROPERTIES:
+:ID:       ca56ead1-fe97-469d-8a54-0eb28e001553
+:END:
 🍎+N and 🍎+W (CMD+n CMD+w) should open/close a new /frame/ not a new buffer.  "Frame" means "window"
 #+begin_src emacs-lisp
 (map! :g "s-n" :desc "Open a new frame" #'make-frame-command)
@@ -378,41 +393,19 @@ unmap tab from company and yas-snippets in insert mode:
 
 #+end_src
 
-Use ~org-ql~ to find headings in the current buffer or in the agenda files
+Use ~org-ql~ to find headings in the current buffer or in the agenda files (I don't use agenda, though)
 #+begin_src emacs-lisp
 (map! :leader :desc "Org-ql-find headline entry in file" "o f" #'org-ql-find)
 (map! :leader :desc "Org-ql-find headline entry in agenda" "o F" #'org-ql-find-in-agenda)
 #+end_src
 
-*** Maps that do more:
-Jump to the GTD todo list:  "<SPC> o t" (open (org?) todo)
+** Markdown
+I want ~evil-markdown~ to also handle the M-k M-j list up/down when in insert mode (as orgmode does):
 #+begin_src emacs-lisp
-(defun jq-open-todo-file ()
-  (interactive)
-  (find-file "~/org/gtd.org"))
-
-(defun jq-open-inbox-file ()
-  (interactive)
-  (find-file "~/org/inbox.org"))
-
-(map! :leader :desc "Open the GTD todo list" "o t" #'jq-open-todo-file)
-(map! :leader :desc "Open the GTD inbox list" "o i" #'jq-open-inbox-file)
-#+end_src
-
-Open the GTD agenda
-#+begin_src emacs-lisp
-(map! :leader :desc "open agenda" "o a g" #'org-agenda)
-#+end_src
-
-Search my logseq notes with a helpful shortcut "<SPC> o l"  (open (org? oliver?) logseq)
-#+begin_src emacs-lisp
-(defun jq-search-in-logseq ()
-  (interactive)
-  (consult-ripgrep "~/logseq"))
-
-(map! :leader :desc "Search in logseq" "o l" #'jq-search-in-logseq)
-(map! :leader :desc "Search my notes (in logseq)" "s n" #'jq-search-in-logseq)
-(map! :leader :desc "Search my notes (in logseq)" "n s" #'jq-search-in-logseq)
+(after! evil-markdown
+        (map! :i "M-k" 'markdown-move-up)
+        (map! :i "M-j" 'markdown-move-down)
+)
 #+end_src
 
 ** Math preview
@@ -515,6 +508,8 @@ Now, text isn't actually centered because =writeroom-mode= adds the line number 
 
 I haven't done anything to configure these; just asking Doom to install it for latex and python made it work out of the box. If I need custom configurations, I'll include those here.
 
+... and honestly, I'm using VS Code mostly... but I still love org-mode... (jq April 30, 2024)
+
 ** LaTeX
 #+begin_src emacs-lisp
 (when (equal system-type 'darwin)
@@ -591,113 +586,12 @@ Protect the files from accidentally editing or deleting things we don't see.
 (setq org-element-use-cache nil)
 #+end_src
 
-** GTD, todo and agenda
-Basic directory setup
-#+begin_src emacs-lisp
-  (setq org-directory "~/org")
-  (setq org-agenda-files
-        (mapcar 'file-truename
-                (file-expand-wildcards "~/org")))
-  (setq org-archive-location "~/org/archive/%s_archive::")
-#+end_src
-
-*** Capture and refiles
-Note that doom overwrites capture templates and refile targets, so you need it ~(after! org)~
-
-#+begin_src emacs-lisp
-(after! org
-  (setq org-capture-templates
-        `(("i" "Inbox" entry (file "inbox.org")
-           "* TODO %?\n %l")))
-  (setq org-refile-targets '((nil :maxlevel . 5) ; current file
-                             ("gtd.org" :maxlevel . 2)
-                             (org-agenda-files :maxlevel . 2)))
-
-  (setq org-todo-keywords
-        '((sequence "TODO(t)" "NEXT(n)" "WAIT(h)" "SOMEDAY(s)" "PROJ(p)" "|" "DONE(d) CANCEL(c)")))
-
-  (setq org-log-done 'time)
-  )
-#+end_src
-
-Exclude completed tasks from refile targets, from [[https://michael.englehorn.com/config.html][Michael Englehorn’s Emacs Configuration]] (via [[https://github.com/mwfogleman/.emacs.d/blob/master/michael.org][Tasshin Fogleman's configuration]])
-#+begin_src  emacs-lisp
-(defun bh/verify-refile-target ()
-  "Exclude todo keywords with a done state from refile targets"
-  (not (member (nth 2 (org-heading-components)) org-done-keywords)))
-
-(setq org-refile-target-verify-function 'bh/verify-refile-target)
-#+end_src
+*** GTD and more...
+Don't use org for this. I use Todoist. Let's remove clutter.
 
 *** Agenda
-First, I don't want to distinguish "blocked" tasks from non-blocked; I just want plain lists.  Org Agenda does a different (face) color for blocked tasks, and that confused me until I found this:
-#+begin_src emacs-lisp
-(setq org-agenda-dim-blocked-tasks nil)
-#+end_src
+... I no longer use org agenda at all. Let's just ditch it.
 
-Some basic agenda setup variables:
-#+begin_src emacs-lisp
-(setq org-agenda-show-future-repeats nil ;; possibly consider 'next
-      org-agenda-skip-deadline-if-done t
-      ; org-agenda-skip-scheduled-if-done t
-      )
-#+end_src
-
-
-This is mostly copy-pasted and needs a lot of adjustment
-#+begin_src emacs-lisp
-  (setq org-agenda-hide-tags-regexp ".")
-  (setq org-agenda-prefix-format
-        '((agenda . " %i %-12:c%?-12t% s")
-          (todo   . " ")
-          (tags   . " %i %-12:c")
-          (search . " %i %-12:c")))
-
-  ;; in the agenda, hide the todo state
-  ; (setq org-agenda-todo-keyword-format "")
-  ;; ;; hide done tasks
-  ;(setq org-agenda-skip-scheduled-if-done "")
-
-  (setq org-agenda-custom-commands
-        '(("Q" . "Custom queries") ;; gives label to "Q"
-           ("Qa" "Archive search" search ""
-            ((org-agenda-files (file-expand-wildcards "~/org/archive/*.org_archive")
-                               ((org-agenda-overriding-header "From the Archives"))
-                               )))
-           ("Qb" "Projects and Archive" search ""
-            ((org-agenda-text-search-extra-files
-              (file-expand-wildcards "~/archive/*.org_archive")
-              ((org-agenda-overriding-header "From the Archives"))
-              )))
-           ;; searches both projects and archive directories
-           ("QA" "Archive tags search" org-tags-view ""
-            ((org-agenda-files (file-expand-wildcards "~/org/archive/*.org_archive")
-                               ((org-agenda-overriding-header "From the Archives"))
-                               )))
-          ("i" "Inbox / To Refile"
-           ((tags "refile-ignore" ;; note "-" means ignore
-                  ((org-agenda-overriding-header "Items to Refile")))))
-          ("s" "Shopping / Buy List"
-           ((tags "shopping")))
-          ("p" "Projects List"
-                    ((org-ql-block '(and (todo "PROJ")
-                              (not (tags "someday")))
-                     ((org-ql-block-header "Active Projects (excludes :someday:)"))
-                     )))
-          ("g" "Today's Agenda"
-           ((agenda ""
-                    ((org-agenda-skip-function
-                      '(org-agenda-skip-entry-if 'deadline))
-                     (org-deadline-warning-days 0)))))
-          ))
-#+end_src
-
-** Org and logseq
-Adding this will enable me in emacs to link to subheadings in such a way that logseq will be able to open them:
-#+begin_src emacs-lisp
-(require 'org-id)
-(setq org-id-link-to-org-use-id t)
-#+end_src
 
 ** Org link handlers
 
