@@ -43,7 +43,7 @@ Default fonts first
                            :size 16
                            :width 'wide)
       doom-variable-pitch-font (font-spec :name "Iosevka Etoile"
-                                          ; note that :size doesn't work; Use   (set-face-attribute 'variable-pitch nil :height PROPORTION) to modify it proportionally to doom-font;  this is below.
+                                        ; note that :size doesn't work; Use   (set-face-attribute 'variable-pitch nil :height PROPORTION) to modify it proportionally to doom-font;  this is below.
                                           :weight 'regular)
       doom-serif-font (font-spec :name "Iosevka Etoile"
                                  :weight 'regular)
@@ -63,7 +63,7 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
   (dolist (hook mixed-pitch-modes)
     (add-hook (intern (concat (symbol-name hook) "-hook")) #'mixed-pitch-mode)))
 (add-hook 'doom-init-ui-hook #'init-mixed-pitch-h [[
-]] )
+                                                    ]] )
 
 (after! mixed-pitch
   (defface variable-pitch-serif
@@ -114,7 +114,7 @@ Pretty headlines for orgmode
         (2 . (rainbow 1.0))
         (t . (rainbow  1.0))
         ))
-        ;(t . (rainbow 1.0))))
+                                        ;(t . (rainbow 1.0))))
 (setq modus-themes-scale-headings t)
 #+end_src
 
@@ -135,7 +135,7 @@ We could choose to darken the org-blocks.  At this point, I choose not to.
 Basics on default frame size and I actually want scroll bars (for the visual indicator of where I am on a document)
 #+begin_src emacs-lisp
 (setq +doom-dashboard-banner-file (expand-file-name "coffeesquirrel.png" doom-private-dir)
-       initial-frame-alist '((top . 1) (left . 1) (width . 100)  (height . 40)))
+      initial-frame-alist '((top . 1) (left . 1) (width . 100)  (height . 40)))
 
 (setq scroll-bar-mode 'right)
 (scroll-bar-mode)
@@ -144,59 +144,59 @@ Basics on default frame size and I actually want scroll bars (for the visual ind
 Update the window geometry to the last used position/sizes. [[https://www.reddit.com/r/emacs/comments/4ermj9/comment/d237n0i/?utm_source=share&utm_medium=web2x&context=3][Got it from reddit.]]
 #+begin_src emacs-lisp
 (defun save-frameg ()
-"Gets the current frame's geometry and saves to ~/.emacs.frameg."
-(let ((frameg-font (frame-parameter (selected-frame) 'font))
-(frameg-left (frame-parameter (selected-frame) 'left))
-(frameg-top (frame-parameter (selected-frame) 'top))
-(frameg-width (frame-parameter (selected-frame) 'width))
-(frameg-height (frame-parameter (selected-frame) 'height))
-(frameg-file (expand-file-name "~/.emacs.frameg")))
-(with-temp-buffer
-;; Turn off backup for this file
-(make-local-variable 'make-backup-files)
-(setq make-backup-files nil)
-(insert
-";;; This file stores the previous emacs frame's geometry.\n"
-";;; Last generated " (current-time-string) ".\n"
-"(setq initial-frame-alist\n"
-;; " '((font . \"" frameg-font "\")\n"
-" '("
-(format " (top . %d)\n" (max frameg-top 0))
-(format " (left . %d)\n" (max frameg-left 0))
-(format " (width . %d)\n" (max frameg-width 0))
-(format " (height . %d)))\n" (max frameg-height 0)))
-(when (file-writable-p frameg-file)
-(write-file frameg-file)))))
+  "Gets the current frame's geometry and saves to ~/.emacs.frameg."
+  (let ((frameg-font (frame-parameter (selected-frame) 'font))
+        (frameg-left (frame-parameter (selected-frame) 'left))
+        (frameg-top (frame-parameter (selected-frame) 'top))
+        (frameg-width (frame-parameter (selected-frame) 'width))
+        (frameg-height (frame-parameter (selected-frame) 'height))
+        (frameg-file (expand-file-name "~/.emacs.frameg")))
+    (with-temp-buffer
+      ;; Turn off backup for this file
+      (make-local-variable 'make-backup-files)
+      (setq make-backup-files nil)
+      (insert
+       ";;; This file stores the previous emacs frame's geometry.\n"
+       ";;; Last generated " (current-time-string) ".\n"
+       "(setq initial-frame-alist\n"
+       ;; " '((font . \"" frameg-font "\")\n"
+       " '("
+       (format " (top . %d)\n" (max frameg-top 0))
+       (format " (left . %d)\n" (max frameg-left 0))
+       (format " (width . %d)\n" (max frameg-width 0))
+       (format " (height . %d)))\n" (max frameg-height 0)))
+      (when (file-writable-p frameg-file)
+        (write-file frameg-file)))))
 
 (defun load-frameg ()
-"Loads ~/.emacs.frameg which should load the previous frame's geometry."
-(let ((frameg-file (expand-file-name "~/.emacs.frameg")))
-(when (file-readable-p frameg-file)
-(load-file frameg-file))))
+  "Loads ~/.emacs.frameg which should load the previous frame's geometry."
+  (let ((frameg-file (expand-file-name "~/.emacs.frameg")))
+    (when (file-readable-p frameg-file)
+      (load-file frameg-file))))
 
 ;; Special work to do ONLY when there is a window system being used
 (if window-system
-(progn
-(add-hook 'after-init-hook 'load-frameg)
-(add-hook 'kill-emacs-hook 'save-frameg)))
+    (progn
+      (add-hook 'after-init-hook 'load-frameg)
+      (add-hook 'kill-emacs-hook 'save-frameg)))
 #+end_src
 
 
 I'm only on a macbook now:
 #+begin_src emacs-lisp
-  (setq mac-command-modifier      'super
-        ns-command-modifier       'super
-        mac-option-modifier       'meta
-        ns-option-modifier        'meta
-        ; it is a bug in emacs that external keyboards plugged in treat ALL modifier keys has right-modifiers... so make right modifer option to meta to get the standard alt behavior! https://github.com/hlissner/doom-emacs/issues/4178
-        mac-right-option-modifier 'meta
-        ns-right-option-modifier  'meta)
+(setq mac-command-modifier      'super
+      ns-command-modifier       'super
+      mac-option-modifier       'meta
+      ns-option-modifier        'meta
+                                        ; it is a bug in emacs that external keyboards plugged in treat ALL modifier keys has right-modifiers... so make right modifer option to meta to get the standard alt behavior! https://github.com/hlissner/doom-emacs/issues/4178
+      mac-right-option-modifier 'meta
+      ns-right-option-modifier  'meta)
 #+end_src
 
- make *Scratch* act like org-mode
- #+begin_src emacs-lisp
+make *Scratch* act like org-mode
+#+begin_src emacs-lisp
 (setq doom-scratch-buffer-major-mode 'org-mode)
- #+end_src
+#+end_src
 
 ~which-key~ popups are good.
 #+begin_src emacs-lisp
@@ -213,7 +213,7 @@ I'm only on a macbook now:
 Soft wrap is very important to me. I need to include this not only in ~config.el~ but also in ~init.el~.
 #+begin_src emacs-lisp
 (global-visual-line-mode +1)
-; (setq +word-wrap-extra-indent 2)
+                                        ; (setq +word-wrap-extra-indent 2)
 (remove-hook 'text-mode-hook #'auto-fill-mode)
 #+end_src
 
@@ -342,7 +342,7 @@ And we include backups of files even in version control, since they won't be in 
 ** Vertico (like helm/ivy)
 #+begin_src emacs-lisp
 (setq! orderless-matching-styles
-       ; '(orderless-literal orderless-regexp orderless-flex)
+                                        ; '(orderless-literal orderless-regexp orderless-flex)
        '(orderless-literal orderless-flex)
        )
 #+end_src
@@ -422,7 +422,7 @@ Make the bottom bar of emacs pretty.
     ("^\\*doom:"
      :size 0.35 :select t :modeline t :quit t :ttl t)))
 
-; With no error, get rid of the compile window
+                                        ; With no error, get rid of the compile window
 (add-hook 'compilation-finish-functions
           (lambda (buf str)
             (if (null (string-match ".*exited abnormally.*" str))
@@ -471,7 +471,7 @@ unmap tab from company and yas-snippets in insert mode:
 (map! :i
       ;; use caps(ctrl) + ; to trigger the M-x command list
       "C-;" 'execute-extended-command)
-;(map! :mode org-mode :n "S-TAB" 'org-cycle)
+                                        ;(map! :mode org-mode :n "S-TAB" 'org-cycle)
 
 #+end_src
 
@@ -485,25 +485,25 @@ Use ~org-ql~ to find headings in the current buffer or in the agenda files (I do
 I want ~evil-markdown~ to also handle the M-k M-j list up/down when in insert mode (as orgmode does):
 #+begin_src emacs-lisp
 (after! evil-markdown
-        (map! :i "M-k" 'markdown-move-up)
-        (map! :i "M-j" 'markdown-move-down)
-)
+  (map! :i "M-k" 'markdown-move-up)
+  (map! :i "M-j" 'markdown-move-down)
+  )
 #+end_src
 
 ** Math preview
 The =math-preview= package works even in nxml mode!
 #+begin_src emacs-lisp
 (setq math-preview-tex-macros
-   '(("ddx" "\\frac{d#2}{d#1}" 2 "t")
-     ("and" . "\\mbox{ and }"))
-   math-preview-tex-marks
-   '(("\\begin{equation}" "\\end{equation}")
-     ("\\begin{equation*}" "\\end{equation*}")
-     ("\\[" "\\]")
-     ("$$" "$$")
-     ("<m>" "</m>")
-     ("<me>" "</me>")
-     ("<mrow>" "</mrow>")))
+      '(("ddx" "\\frac{d#2}{d#1}" 2 "t")
+        ("and" . "\\mbox{ and }"))
+      math-preview-tex-marks
+      '(("\\begin{equation}" "\\end{equation}")
+        ("\\begin{equation*}" "\\end{equation*}")
+        ("\\[" "\\]")
+        ("$$" "$$")
+        ("<m>" "</m>")
+        ("<me>" "</me>")
+        ("<mrow>" "</mrow>")))
 #+end_src
 
 ** Line Numbers and padding
@@ -605,7 +605,7 @@ I haven't done anything to configure these; just asking Doom to install it for l
 Still haven't settled on what I actually want on this below, but I also don't spend a lot of time directly editing latex files anymore, which is nice...
 #+begin_src emacs-lisp
 ;; First, dump smartparens in AucTex, then use Auctex's own electric bracket and math closures
-;(add-hook 'LaTeX-mode-hook #'turn-off-smartparens-mode)
+                                        ;(add-hook 'LaTeX-mode-hook #'turn-off-smartparens-mode)
 (setq TeX-electric-sub-and-superscript nil)
 ;; (setq LaTeX-electric-left-right-brace 't)
 ;; (setq TeX-electric-math (cons "$" "$"))
@@ -615,7 +615,7 @@ Ignore unnecessary tex files and such in find-file
 TODO: This doesn't do anything with vertico...
 #+begin_src emacs-lisp
 (append completion-ignored-extensions (quote (
-  ".aux" ".synctex.gz" ".fdb_latexmk" ".fls" ".out" ".synctex")))
+                                              ".aux" ".synctex.gz" ".fdb_latexmk" ".fls" ".out" ".synctex")))
 #+end_src
 
 ** NXML / PreText
@@ -680,7 +680,7 @@ Don't use org for this. I use Todoist. Let's remove clutter.
 
 First, we ask org to render our links:
 #+begin_src emacs-lisp
-; The following makes emacs follow (correctly!) the links setup in Obsidian and Logseq
+                                        ; The following makes emacs follow (correctly!) the links setup in Obsidian and Logseq
 (setq markdown-enable-wiki-links t
       markdown-wiki-link-search-type '(parent-directories sub-directories)
       markdown-enable-math t
@@ -692,71 +692,71 @@ This is the same code, just with different handlers; I should probably make it m
 
 Obsidian:
 #+begin_src emacs-lisp
-  ;; obsidan link handling for obsidian:// links
-  (defun org-obsidian-link-open (slash-message-id)
-    "Handler for org-link-set-parameters that opens a obsidian:// link in obsidian"
-    ;; remove any / at the start of slash-message-id to create real note-id
-    (let ((message-id
-           (replace-regexp-in-string (rx bos (* "/"))
-                                     ""
-                                     slash-message-id)))
-      (do-applescript
-       (concat "tell application \"Obsidian\" to open location \"obsidian://"
-               message-id
-               "\" activate"))))
-  (org-link-set-parameters "obsidian" :follow #'org-obsidian-link-open)
+;; obsidan link handling for obsidian:// links
+(defun org-obsidian-link-open (slash-message-id)
+  "Handler for org-link-set-parameters that opens a obsidian:// link in obsidian"
+  ;; remove any / at the start of slash-message-id to create real note-id
+  (let ((message-id
+         (replace-regexp-in-string (rx bos (* "/"))
+                                   ""
+                                   slash-message-id)))
+    (do-applescript
+     (concat "tell application \"Obsidian\" to open location \"obsidian://"
+             message-id
+             "\" activate"))))
+(org-link-set-parameters "obsidian" :follow #'org-obsidian-link-open)
 #+end_src
 
 Logseq:
 #+begin_src emacs-lisp
-  ;; obsidan link handling for logseq:// links
-  (defun org-logseq-link-open (slash-message-id)
-    "Handler for org-link-set-parameters that opens a logseq:// link in logseq"
-    ;; remove any / at the start of slash-message-id to create real note-id
-    (let ((message-id
-           (replace-regexp-in-string (rx bos (* "/"))
-                                     ""
-                                     slash-message-id)))
-      (do-applescript
-       (concat "tell application \"Logseq\" to open location \"logseq://"
-               message-id
-               "\" activate"))))
-  (org-link-set-parameters "logseq" :follow #'org-logseq-link-open)
+;; obsidan link handling for logseq:// links
+(defun org-logseq-link-open (slash-message-id)
+  "Handler for org-link-set-parameters that opens a logseq:// link in logseq"
+  ;; remove any / at the start of slash-message-id to create real note-id
+  (let ((message-id
+         (replace-regexp-in-string (rx bos (* "/"))
+                                   ""
+                                   slash-message-id)))
+    (do-applescript
+     (concat "tell application \"Logseq\" to open location \"logseq://"
+             message-id
+             "\" activate"))))
+(org-link-set-parameters "logseq" :follow #'org-logseq-link-open)
 #+end_src
 
 Emails / message://
 #+begin_src emacs-lisp
-  ;; Email link handlink for message:// links
-  (defun org-message-mail-open (slash-message-id)
-    "Handler for org-link-set-parameters that opens a message:// link in apple mail"
-    ;; remove any / at the start of slash-message-id to create real message-id
-    (let ((message-id
-           (replace-regexp-in-string (rx bos (* "/"))
-                                     ""
-                                     slash-message-id)))
-      (do-applescript
-       (concat "tell application \"mail\" to open location \"message://"
-               message-id
-               "\" activate"))))
-  (org-link-set-parameters "message" :follow #'org-message-mail-open)
+;; Email link handlink for message:// links
+(defun org-message-mail-open (slash-message-id)
+  "Handler for org-link-set-parameters that opens a message:// link in apple mail"
+  ;; remove any / at the start of slash-message-id to create real message-id
+  (let ((message-id
+         (replace-regexp-in-string (rx bos (* "/"))
+                                   ""
+                                   slash-message-id)))
+    (do-applescript
+     (concat "tell application \"mail\" to open location \"message://"
+             message-id
+             "\" activate"))))
+(org-link-set-parameters "message" :follow #'org-message-mail-open)
 #+end_src
 
 And Zotero
 #+begin_src emacs-lisp
-  (defun org-zotero-link-open (slash-message-id)
-    "Handler for org-link-set-parameters that opens a zotero:// link in zotero"
-    (let ((message-id
-           (replace-regexp-in-string (rx bos (* "/"))
-                                     ""
-                                     slash-message-id)))
-      (do-applescript
-       (concat "tell application \"Zotero\" to open location \"zotero://"
-               message-id
-               "\" activate"))))
-  (org-link-set-parameters "zotero" :follow #'org-zotero-link-open)
+(defun org-zotero-link-open (slash-message-id)
+  "Handler for org-link-set-parameters that opens a zotero:// link in zotero"
+  (let ((message-id
+         (replace-regexp-in-string (rx bos (* "/"))
+                                   ""
+                                   slash-message-id)))
+    (do-applescript
+     (concat "tell application \"Zotero\" to open location \"zotero://"
+             message-id
+             "\" activate"))))
+(org-link-set-parameters "zotero" :follow #'org-zotero-link-open)
 #+end_src
 
 *** For org-cite
 #+begin_src emacs-lisp
-  (setq! org-cite-csl-styles-dir "~/Zotero/styles")
+(setq! org-cite-csl-styles-dir "~/Zotero/styles")
 #+end_src
