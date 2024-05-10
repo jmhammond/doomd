@@ -6,7 +6,6 @@
 ; I might get rid of this part, given that the package is stable and has been out since 2007, but it's still updated and my focus is on markdown at the moment.
 (unpin! (:lang markdown))
 
-
 (package! org-ql)
 
 (package! math-preview :recipe (:host gitlab :repo "matsievskiysv/math-preview"))

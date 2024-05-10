@@ -39,15 +39,21 @@ This file will be written when org does some ~org-tangle~-ing of the code. Hopef
 ** Fonts
 Default fonts first
 #+begin_src emacs-lisp
-(setq doom-font (font-spec :family "Source Code Pro" :size 16)
-      doom-variable-pitch-font (font-spec :family "Georgia" :size 18)
-      doom-serif-font (font-spec :family "Georgia" :size 18 )
+(setq doom-font (font-spec :name "Iosevka Comfy"
+                           :size 16
+                           :width 'wide)
+      doom-variable-pitch-font (font-spec :name "Iosevka Etoile"
+                                          ; note that :size doesn't work; Use   (set-face-attribute 'variable-pitch nil :height PROPORTION) to modify it proportionally to doom-font;  this is below.
+                                          :weight 'regular)
+      doom-serif-font (font-spec :name "Iosevka Etoile"
+                                 :weight 'regular)
       )
 #+end_src
 
 Mixing sans and serif'd fonts in desired modes:
+
 #+begin_src emacs-lisp
-(defvar mixed-pitch-modes '(org-mode LaTeX-mode markdown-mode gfm-mode Info-mode)
+(defvar mixed-pitch-modes '(org-mode markdown-mode tex-mode Info-mode)
   "Modes that `mixed-pitch-mode' should be enabled in, but only after UI initialisation.")
 (defun init-mixed-pitch-h ()
   "Hook `mixed-pitch-mode' into each mode in `mixed-pitch-modes'.
@@ -64,8 +70,9 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
     '((t (:family "serif")))
     "A variable-pitch face with serifs."
     :group 'basic-faces)
-  ;(setq mixed-pitch-set-height t)
+  (setq mixed-pitch-set-height t)
   (setq variable-pitch-serif-font doom-variable-pitch-font)
+  (set-face-attribute 'variable-pitch nil :height 0.95)
   (set-face-attribute 'variable-pitch-serif nil :font variable-pitch-serif-font)
   (defun mixed-pitch-serif-mode (&optional arg)
     "Change the default face of the current buffer to a serifed variable pitch, while keeping some faces fixed pitch."
@@ -84,6 +91,10 @@ cancelled... I'm trying to roll back to less gui.  Use VS Code for GUI, emacs fo
 ;; (setq centaur-tabs-set-modified-marker t)
 #+end_src
 '
+** Hide the title bar?
+#+begin_src emacs-lisp
+;; (add-to-list 'default-frame-alist '(undecorated-round . t))
+#+end_src
 ** Theme
 The modus themes are great. This /vivendi/ is dark and /operandi/ is light. You can switch between them with ~M-x modus-themes-toggle~
 #+begin_src emacs-lisp
@@ -124,11 +135,52 @@ We could choose to darken the org-blocks.  At this point, I choose not to.
 Basics on default frame size and I actually want scroll bars (for the visual indicator of where I am on a document)
 #+begin_src emacs-lisp
 (setq +doom-dashboard-banner-file (expand-file-name "coffeesquirrel.png" doom-private-dir)
-      initial-frame-alist '((top . 1) (left . 1) (width . 100)  (height . 40)))
+       initial-frame-alist '((top . 1) (left . 1) (width . 100)  (height . 40)))
 
 (setq scroll-bar-mode 'right)
 (scroll-bar-mode)
 #+end_src
+
+Update the window geometry to the last used position/sizes. [[https://www.reddit.com/r/emacs/comments/4ermj9/comment/d237n0i/?utm_source=share&utm_medium=web2x&context=3][Got it from reddit.]]
+#+begin_src emacs-lisp
+(defun save-frameg ()
+"Gets the current frame's geometry and saves to ~/.emacs.frameg."
+(let ((frameg-font (frame-parameter (selected-frame) 'font))
+(frameg-left (frame-parameter (selected-frame) 'left))
+(frameg-top (frame-parameter (selected-frame) 'top))
+(frameg-width (frame-parameter (selected-frame) 'width))
+(frameg-height (frame-parameter (selected-frame) 'height))
+(frameg-file (expand-file-name "~/.emacs.frameg")))
+(with-temp-buffer
+;; Turn off backup for this file
+(make-local-variable 'make-backup-files)
+(setq make-backup-files nil)
+(insert
+";;; This file stores the previous emacs frame's geometry.\n"
+";;; Last generated " (current-time-string) ".\n"
+"(setq initial-frame-alist\n"
+;; " '((font . \"" frameg-font "\")\n"
+" '("
+(format " (top . %d)\n" (max frameg-top 0))
+(format " (left . %d)\n" (max frameg-left 0))
+(format " (width . %d)\n" (max frameg-width 0))
+(format " (height . %d)))\n" (max frameg-height 0)))
+(when (file-writable-p frameg-file)
+(write-file frameg-file)))))
+
+(defun load-frameg ()
+"Loads ~/.emacs.frameg which should load the previous frame's geometry."
+(let ((frameg-file (expand-file-name "~/.emacs.frameg")))
+(when (file-readable-p frameg-file)
+(load-file frameg-file))))
+
+;; Special work to do ONLY when there is a window system being used
+(if window-system
+(progn
+(add-hook 'after-init-hook 'load-frameg)
+(add-hook 'kill-emacs-hook 'save-frameg)))
+#+end_src
+
 
 I'm only on a macbook now:
 #+begin_src emacs-lisp
@@ -267,6 +319,26 @@ The mode responsible was ~ws-butler~ which cleans up whitespace. That's normally
 #+begin_src emacs-lisp
 (global-auto-revert-mode t)
 #+end_src
+** Auto Backup
+Backup files should be in their own directory, like we did in vim years ago.
+#+begin_src emacs-lisp
+(setq backup-directory-alist
+      `(("." . ,(expand-file-name
+                 (concat user-emacs-directory "backups")))))
+(setq make-backup-files t               ; backup of a file the first time it is saved.
+      backup-by-copying t               ; don't clobber symlinks
+      version-control t                 ; version numbers for backup files
+      delete-old-versions t             ; delete excess backup files silently
+      delete-by-moving-to-trash t
+      kept-old-versions 6               ; oldest versions to keep when a new numbered backup is made (default: 2)
+      kept-new-versions 9               ; newest versions to keep when a new numbered backup is made (default: 2)
+      )
+#+end_src
+
+And we include backups of files even in version control, since they won't be in the VC directory:
+#+begin_src emacs-lisp
+(setq vc-make-backup-files t)
+#+end_src
 ** Vertico (like helm/ivy)
 #+begin_src emacs-lisp
 (setq! orderless-matching-styles
@@ -274,6 +346,16 @@ The mode responsible was ~ws-butler~ which cleans up whitespace. That's normally
        '(orderless-literal orderless-flex)
        )
 #+end_src
+
+Improving the ~find-file~ experience:
+
+This doesn't work like I think that it should.
+#+begin_src emacs-lisp
+(map! :after vertico
+      :map vertico-map
+      "C-w" #'vertico-directory-delete-char)
+#+end_src
+
 ** Desired tweaks to evil-mode
 
 let f, s, etc, find on visual lines
@@ -530,9 +612,10 @@ Still haven't settled on what I actually want on this below, but I also don't sp
 #+end_src
 
 Ignore unnecessary tex files and such in find-file
+TODO: This doesn't do anything with vertico...
 #+begin_src emacs-lisp
-(after! counsel
-  (setq counsel-find-file-ignore-regexp "\\(?:^#\\)\\|\\(?:[#~]$\\)\\|\\(?:^Icon?\\)\\|\\(aux\\)\\|\\(fdb_latexmk\\)\\|\\(fls\\)\\|\\(out\\)\\|\\(synctex\\)\\|\\(pdf\\)\\|\\(log\\)"))
+(append completion-ignored-extensions (quote (
+  ".aux" ".synctex.gz" ".fdb_latexmk" ".fls" ".out" ".synctex")))
 #+end_src
 
 ** NXML / PreText
