@@ -39,13 +39,14 @@ This file will be written when org does some ~org-tangle~-ing of the code. Hopef
 ** Fonts
 Default fonts first
 #+begin_src emacs-lisp
-(setq doom-font (font-spec :name "Iosevka Comfy"
-                           :size 16
-                           :width 'wide)
-      doom-variable-pitch-font (font-spec :name "Iosevka Etoile"
+(setq doom-font (font-spec :name "Menlo"
+                           :size 15
+                           :width 'regular)
+      doom-variable-pitch-font (font-spec :name "Avenir Next"
                                         ; note that :size doesn't work; Use   (set-face-attribute 'variable-pitch nil :height PROPORTION) to modify it proportionally to doom-font;  this is below.
+                                          :size 16
                                           :weight 'regular)
-      doom-serif-font (font-spec :name "Iosevka Etoile"
+      doom-serif-font (font-spec :name "Baskerville"
                                  :weight 'regular)
       )
 #+end_src
@@ -72,7 +73,7 @@ Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
     :group 'basic-faces)
   (setq mixed-pitch-set-height t)
   (setq variable-pitch-serif-font doom-variable-pitch-font)
-  (set-face-attribute 'variable-pitch nil :height 0.95)
+  (set-face-attribute 'variable-pitch nil :height 1.1)
   (set-face-attribute 'variable-pitch-serif nil :font variable-pitch-serif-font)
   (defun mixed-pitch-serif-mode (&optional arg)
     "Change the default face of the current buffer to a serifed variable pitch, while keeping some faces fixed pitch."
@@ -226,19 +227,10 @@ For split windows, be asked what to load:
   (consult-buffer))
 #+end_src
 
-Disable the company idle popup -- work-around for org-tables and TAB
+Optional: Disable the company idle popup -- work-around for org-tables and TAB
+... but right now, I've re-enabled it,  because it makes the LSP autocomplete in latex useful.
 #+begin_src emacs-lisp
-(setq company-idle-delay nil)
-#+end_src
-
-Apparently this helps somehow
-#+begin_src emacs-lisp
-(setq undo-tree-enable-undo-in-region nil)
-#+end_src
-
-And I really don't actually like the highlighted current line because it's creating too much noise in org-mode...?
-#+begin_src emacs-lisp
-(hl-line-mode -1)
+(setq company-idle-delay 1.0)
 #+end_src
 ** Treemacs
 #+begin_src emacs-lisp
@@ -301,7 +293,7 @@ And I really don't actually like the highlighted current line because it's creat
           "*/_region_.tex")))
 #+end_src
 ** Autosave and auto-revert
-I want to enable auto save so I don't lose changes; I also want to autorevert buffers that change on the disk because I'm using beorg on the phone, and if I mark a task as DONE, I want that reflected.
+I want to enable auto save so I don't lose changes; I also want to autorevert buffers that change on the disk
 
 Autosave everything  (but after 20 seconds of idleness, so I can be in the middle of thoughts, say in org-capture window and not have it save and remove my C-c C-c functionality)
 #+begin_src emacs-lisp 
@@ -349,12 +341,34 @@ And we include backups of files even in version control, since they won't be in 
 
 Improving the ~find-file~ experience:
 
-This doesn't work like I think that it should.
+I think this doesn't work like I think that it should.
 #+begin_src emacs-lisp
 (map! :after vertico
       :map vertico-map
-      "C-w" #'vertico-directory-delete-char)
+      "C-w" #'vertico-directory-delete-word)
 #+end_src
+** Clipboard
+Doom seems to default to all kill actions being put in the clipboard.  I don't like this.
+
+The solution that seems to work for me is to [[https://emacs.stackexchange.com/questions/22266/backspace-without-adding-to-kill-ring][~advice~ the functions I don't want to put onto the kill ring suggested on StackOverflow]]. This lets me keep the "dd" and "yy" commands putting things to the system clipboard, and "P" and "p" will work with the clipboard paste, but "C-w" and backspace no longer put junk on the clipboard. Hooray!
+
+#+begin_src emacs-lisp
+(defun my/call-interactively-inhibit-kill-ring (fun &rest args)
+  "Call FUN interactively saving the kill-ring when called interactively.
+Otherwise call FUN with ARGS."
+  (if (interactive-p)
+      (let ((kill-ring '("dummy"))  ; Dummy value in case FUN tries to append.
+            (kill-ring-yank-pointer nil))
+        (call-interactively fun))
+    (apply fun args)))
+
+(defun my/inhibit-kill-ring-in (cmd)
+  (advice-add cmd :around #'my/call-interactively-inhibit-kill-ring))
+
+(my/inhibit-kill-ring-in 'backward-kill-word)
+(my/inhibit-kill-ring-in 'kill-word)
+#+end_src
+
 
 ** Desired tweaks to evil-mode
 
@@ -379,6 +393,7 @@ and let myself go up and down on visual lines
         evil-move-cursor-back nil       ; Don't move the block cursor when toggling insert mode;
         evil-kill-on-visual-paste nil)) ; Don't put overwritten text in the kill ring)
 #+end_src
+for the clipboard, Though I also need: [[*Clipboard][the code in the Clipboard bullet.]]
 
 
 #+begin_src emacs-lisp
@@ -399,8 +414,8 @@ Make the bottom bar of emacs pretty.
  doom-modeline-buffer-state-icon t)
 (setq all-the-icons-scale-factor 1.0)
 (custom-set-faces!
-  '(mode-line :family "Fira Code" :height 1.0)
-  '(mode-line-inactive :family "Fira Code" :height 1.0))
+  '(mode-line :family "Iosevka Comfy" :height 1.0)
+  '(mode-line-inactive :family "Iosevka Comfy" :height 1.0))
 
 (defun doom-modeline-conditional-buffer-encoding ()
   "We expect the encoding to be LF UTF-8, so only show the modeline when this is not the case"
@@ -457,9 +472,9 @@ For treemacs
 (map! :ne "M-/" #'comment-or-uncomment-region)
 #+end_src
 
-unmap tab from company and yas-snippets in insert mode:
+uncap tab from company and yas-snippets in insert mode:
 #+begin_src emacs-lisp
-(map! :map company-keymap "TAB" nil)
+;(map! :map company-keymap "TAB" nil)  ; I don't know if this does anything.
 (map! :map yas-keymap "TAB" nil)
 #+end_src
 
@@ -469,16 +484,10 @@ unmap tab from company and yas-snippets in insert mode:
       ";" 'execute-extended-command
       ":" 'eval-expression)
 (map! :i
-      ;; use caps(ctrl) + ; to trigger the M-x command list
+      ;; use caps(ctrl) + ; to trigger the M-x command list when in insert mode.
       "C-;" 'execute-extended-command)
                                         ;(map! :mode org-mode :n "S-TAB" 'org-cycle)
 
-#+end_src
-
-Use ~org-ql~ to find headings in the current buffer or in the agenda files (I don't use agenda, though)
-#+begin_src emacs-lisp
-(map! :leader :desc "Org-ql-find headline entry in file" "o f" #'org-ql-find)
-(map! :leader :desc "Org-ql-find headline entry in agenda" "o F" #'org-ql-find-in-agenda)
 #+end_src
 
 ** Markdown
@@ -513,7 +522,7 @@ The =math-preview= package works even in nxml mode!
 In =text-mode= buffers, I do not want line numbers, but I DO want the padding that the line numbers used to take up.  I like that extra space on the left side of the screen my eyes are accustomed to.
 
 
-[[https://discourse.doomemacs.org/t/setting-window-margins-for-particular-buffers-org-in-particular/2868/6][Code help thanks to tecosaur]] (since modified to the point where most is his, some is mine)
+[[https://discourse.doomemacs.org/t/setting-window-margins-for-particular-buffers-org-in-particular/2868/6][Code help thanks to tecosaur]] (since modified to the point where most of this entire org bullet is his, some is mine)
 #+begin_src emacs-lisp
 (defvar +text-mode-left-margin-width 3
   "The `left-margin-width' to be used in `text-mode' buffers.")
@@ -585,13 +594,14 @@ Now, text isn't actually centered because =writeroom-mode= adds the line number 
 #+end_src
 
 
+** Shell / Terminal
+In the event I end up in =M-x term= land, I need to tell emacs to use a POSIX shell like zsh or bash.  Fish is great, but because it's intentially not POSIX-compatible, emacs gets very unhappy.
+
+Although, working in it the emacs terminal also makes me unhappy, compared to my standard terminal,.... so it's also a reminder to do something else.
+#+begin_src emacs-lisp
+(setq shell-file-name (executable-find "bash"))
+#+end_src
 * Languages
-** Language Server Protocol
-
-I haven't done anything to configure these; just asking Doom to install it for latex and python made it work out of the box. If I need custom configurations, I'll include those here.
-
-... and honestly, I'm using VS Code mostly... but I still love org-mode... (jq April 30, 2024)
-
 ** LaTeX
 #+begin_src emacs-lisp
 (when (equal system-type 'darwin)
@@ -601,6 +611,8 @@ I haven't done anything to configure these; just asking Doom to install it for l
   (setq exec-path (append exec-path '("/Library/TeX/texbin/")))
   )
 #+end_src
+
+LSP:
 
 Still haven't settled on what I actually want on this below, but I also don't spend a lot of time directly editing latex files anymore, which is nice...
 #+begin_src emacs-lisp
@@ -642,11 +654,6 @@ Compile PreText documents via `pretext build' by invoking ~C-c C-c~
 * Org
 Although org is a "language", it has the most subsections, so it deserves to be its own topline heading.
 
-** Use org-ql package
-
-#+begin_src emacs-lisp
-(use-package! org-ql :after org)
-#+end_src
 ** Org gui adjustments
 Allows clicking headline bullets to fold/unfold
 #+begin_src emacs-lisp

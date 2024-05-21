@@ -21,6 +21,7 @@
 
        :completion
        (company           ; the ultimate code completion backend
+        +tng
         +childframe)
        ;;helm              ; the *other* search engine for love and life
        ;;ido               ; the other *other* search engine...
@@ -99,7 +100,7 @@
        (eval +overlay)     ; run code, run (also, repls)
        ;;gist              ; interacting with github gists
        lookup              ; navigate your code and its documentation
-       ;lsp
+       lsp
        magit             ; a git porcelain for Emacs
        make              ; run make tasks from Emacs
        ;;pass              ; password manager for nerds
@@ -146,6 +147,7 @@
        (latex             ; writing papers in Emacs has never been so fun
         +skim
         +lsp
+        +cdlatex
         +latexmk)
        ;;lean
        ;;factor
